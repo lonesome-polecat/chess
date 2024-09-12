@@ -8,8 +8,15 @@ package chess;
  */
 public class ChessMove {
 
+    private final ChessPosition startPosition;
+    private final ChessPosition endPosition;
+    private final ChessPiece.PieceType promotionPiece;
+
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+        this.promotionPiece = promotionPiece;
     }
 
     /**
@@ -26,6 +33,10 @@ public class ChessMove {
         throw new RuntimeException("Not implemented");
     }
 
+    @Override
+    public String toString() {
+        return endPosition.toString();
+    }
     /**
      * Gets the type of piece to promote a pawn to if pawn promotion is part of this
      * chess move
