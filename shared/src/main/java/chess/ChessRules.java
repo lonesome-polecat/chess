@@ -40,7 +40,10 @@ public class ChessRules {
                 if (pieceOnSquare == null) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
                 } else {
-                    validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    // Only add possible move if the piece on square is an enemy piece
+                    if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                        validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    }
                     break;
                 }
             }
@@ -55,7 +58,10 @@ public class ChessRules {
                 if (pieceOnSquare == null) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
                 } else {
-                    validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    // Only add possible move if the piece on square is an enemy piece
+                    if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                        validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    }
                     break;
                 }
             }
@@ -70,7 +76,10 @@ public class ChessRules {
                 if (pieceOnSquare == null) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
                 } else {
-                    validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    // Only add possible move if the piece on square is an enemy piece
+                    if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                        validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    }
                     break;
                 }
             }
@@ -85,7 +94,10 @@ public class ChessRules {
                 if (pieceOnSquare == null) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
                 } else {
-                    validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    // Only add possible move if the piece on square is an enemy piece
+                    if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                        validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    }
                     break;
                 }
             }
