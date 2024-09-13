@@ -84,4 +84,10 @@ public class ChessPiece {
             case PAWN -> "101p";
         };
     }
+
+
+    @Override
+    public String toString() {
+        return String.format("%s %s", pieceColor, getPieceType());
+    }
 }
