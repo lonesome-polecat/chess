@@ -10,12 +10,15 @@ public class ChessRules {
 
         // first get rules for special characters
         if (rules.charAt(3) == 'k') {
+            getKingMoves(validMoves, board, startPos);
             return validMoves;
         }
         if (rules.charAt(3) == 'p') {
+            // getPawnMoves(validMoves, board, startPos);
             return validMoves;
         }
         if (rules.charAt(3) == 'n') {
+            // getKnightRules(validMoves, board, startPos);
             return validMoves;
         }
 
@@ -33,6 +36,37 @@ public class ChessRules {
         }
 
         return validMoves;
+    }
+
+    public static void getKingMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
+
+        int startPosRow = startPos.getRow();
+        int startPosColumn = startPos.getColumn();
+        // check all adjacent squares
+        for (int row = startPosRow-1; row < startPosRow+2; row++) {
+            if (row < 1 || row > 8) {
+                continue;
+            }
+            for (int col = startPosColumn-1; col < startPosColumn+2; col++) {
+                if (col < 1 || col > 8) {
+                    continue;
+                }
+                if (row == startPosRow && col == startPosColumn) {
+                    continue;
+                }
+                var possiblePos = new ChessPosition(row, col);
+                ChessPiece pieceOnSquare = board.getPiece(possiblePos);
+                if (pieceOnSquare == null) {
+                    validMoves.add(new ChessMove(startPos, possiblePos, null));
+                } else {
+                    // Only add possible move if the piece on square is an enemy piece
+                    if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                        validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     public static void getForwardBackMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
