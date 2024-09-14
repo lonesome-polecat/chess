@@ -1,5 +1,6 @@
 package chess;
 
+import javax.management.RuntimeErrorException;
 import java.util.Objects;
 
 /**
@@ -14,6 +15,11 @@ public class ChessPosition {
     private final int col;
 
     public ChessPosition(int row, int col) {
+        if (row < 1 || row > 8) {
+            throw new RuntimeException("Position row is off of board");
+        } else if (col < 1 || col > 8) {
+            throw new RuntimeException("Position column is off of board");
+        }
         this.row = row;
         this.col = col;
     }
