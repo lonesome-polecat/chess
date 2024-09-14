@@ -71,11 +71,6 @@ public class ChessBoard {
         }
     }
 
-    public boolean isSquareEmpty(int row, int col) {
-        System.out.printf("row = %d, column = %d%n", row, col);
-        return squares[row][col] == null;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
