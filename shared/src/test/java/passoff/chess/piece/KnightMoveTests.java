@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static passoff.chess.TestUtilities.validateMoves;
 
-public class KnightMoveTests {
+public class nightMoveTests {
 
     @Test
     public void knightMiddleOfBoardWhite() {

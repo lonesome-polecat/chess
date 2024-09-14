@@ -23,7 +23,7 @@ public class ChessRules {
             return validMoves;
         }
         if (rules.charAt(3) == 'n') {
-            // getKnightRules(validMoves, board, startPos);
+            getKnightMoves(validMoves, board, startPos);
             return validMoves;
         }
 
@@ -69,6 +69,53 @@ public class ChessRules {
                         validMoves.add(new ChessMove(startPos, possiblePos, null));
                     }
                     break;
+                }
+            }
+        }
+    }
+
+    public static void getKnightMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
+
+        int row = startPos.getRow();
+        int col = startPos.getColumn();
+
+        var colSpace = 0;
+        for (int i = -2; i <= 2; i++) {
+            if (row + i < 1 || row + i > 8) {
+                continue;
+            }
+            if (i == 0) {
+                continue;
+            }
+            if (i % 2 == 0) {
+                colSpace = 1;
+            } else {
+                colSpace = 2;
+            }
+            // first check right-side possible space
+            if (col + colSpace < 9) {
+                var possiblePos = new ChessPosition(row+i, col+colSpace);
+                ChessPiece pieceOnSquare = board.getPiece(possiblePos);
+                if (pieceOnSquare == null) {
+                    validMoves.add(new ChessMove(startPos, possiblePos, null));
+                } else {
+                    // Only add possible move if the piece on square is an enemy piece
+                    if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                        validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    }
+                }
+            }
+            // then check left-side possible space
+            if (col - colSpace > 0) {
+                var possiblePos = new ChessPosition(row+i, col-colSpace);
+                ChessPiece pieceOnSquare = board.getPiece(possiblePos);
+                if (pieceOnSquare == null) {
+                    validMoves.add(new ChessMove(startPos, possiblePos, null));
+                } else {
+                    // Only add possible move if the piece on square is an enemy piece
+                    if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                        validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    }
                 }
             }
         }
