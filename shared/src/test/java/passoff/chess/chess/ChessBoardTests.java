@@ -1,4 +1,4 @@
-package passoff.chess;
+package passoff.chess.chess;
 
 import chess.ChessBoard;
 import chess.ChessGame;
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static passoff.chess.TestUtilities.loadBoard;
+import static passoff.chess.chess.TestUtilities.loadBoard;
 
 public class ChessBoardTests {
 
