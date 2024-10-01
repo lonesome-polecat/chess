@@ -21,6 +21,23 @@ public class ChessRules {
         };
     }
 
+    public ArrayList<ChessMove> getTeamMoves(ChessBoard board, ChessGame.TeamColor color) {
+        var teamMoves = new ArrayList<ChessMove>();
+        for (int i = 1; i <= board.BOARD_SIZE; i++) {
+            for (int j = 1; j <= board.BOARD_SIZE; j++) {
+                var position = new ChessPosition(i, j);
+                var piece = board.getPiece(position);
+                if (piece != null) {
+                    if (piece.getTeamColor() == color) {
+                        var pieceMoves = getMoves(board, position);
+                        teamMoves.addAll(pieceMoves);
+                    }
+                }
+            }
+        }
+        return teamMoves;
+    }
+
     public ArrayList<ChessMove> getMoves(ChessBoard board, ChessPosition startPos) {
         var validMoves = getBasicMoves(board, startPos);
         var color = board.getPiece(startPos).getTeamColor();
@@ -523,29 +540,6 @@ public class ChessRules {
             }
         }
         System.out.println(teamAttackVectors.get(teamColor));
-    }
-
-    public Collection<ChessMove> getKingMovesAllChecks(ChessBoard board, ChessPosition kingPos) {
-        var kingColor = board.getPiece(kingPos).getTeamColor();
-        var kingMoves = getBasicMoves(board, kingPos);
-
-        ChessGame.TeamColor enemyColor = null;
-
-        if (kingColor == ChessGame.TeamColor.WHITE) {
-            enemyColor = ChessGame.TeamColor.BLACK;
-        } else {
-            enemyColor = ChessGame.TeamColor.WHITE;
-        }
-
-        updateTeamAttackVectors(enemyColor, board);
-
-        for (var move : kingMoves) {
-            var pos = move.getEndPosition();
-            if (teamAttackVectors.get(enemyColor).contains(pos)) {
-                kingMoves.remove(move);
-            }
-        }
-        return kingMoves;
     }
 
     public boolean isKingInCheck(ChessGame.TeamColor teamColor, ChessBoard board) {

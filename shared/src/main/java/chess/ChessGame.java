@@ -82,10 +82,8 @@ public class ChessGame {
         if (!isInCheck(teamColor)) {
             return false;
         }
-        var kingPosition = board.getSpecificPiecePosition(ChessPiece.PieceType.KING, teamColor);
-        var kingMoves = rules.getKingMovesAllChecks(board, kingPosition);
-        System.out.println(kingMoves);
-        return kingMoves.isEmpty();
+        var validMoves = rules.getTeamMoves(board, teamColor);
+        return validMoves.isEmpty();
     }
 
     /**
@@ -96,8 +94,8 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-
-        throw new RuntimeException("Not implemented");
+        var validMoves = rules.getTeamMoves(board, teamColor);
+        return !isInCheck(teamColor) && validMoves.isEmpty();
     }
 
     /**
