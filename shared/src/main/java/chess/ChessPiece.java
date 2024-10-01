@@ -68,7 +68,7 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         var rules = new ChessRules();
-        ArrayList<ChessMove> validMoves =  rules.getMovesFromRules(board, myPosition);
+        ArrayList<ChessMove> validMoves =  rules.getBasicMoves(board, myPosition);
 
         return validMoves;
     }

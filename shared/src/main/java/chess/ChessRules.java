@@ -21,7 +21,22 @@ public class ChessRules {
         };
     }
 
-    public ArrayList<ChessMove> getMovesFromRules(ChessBoard board, ChessPosition startPos) {
+    public ArrayList<ChessMove> getMoves(ChessBoard board, ChessPosition startPos) {
+        var validMoves = getBasicMoves(board, startPos);
+        var color = board.getPiece(startPos).getTeamColor();
+        var iter = validMoves.iterator();
+        while (iter.hasNext()) {
+            var move = iter.next();
+            var whatIfBoard = new ChessBoard(board);
+            whatIfBoard.movePiece(move);
+            if (isKingInCheck(color, whatIfBoard)) {
+                iter.remove();
+            }
+        }
+        return validMoves;
+    }
+
+    public ArrayList<ChessMove> getBasicMoves(ChessBoard board, ChessPosition startPos) {
 
         var rules = this.getPieceRules(board.getPiece(startPos).getPieceType());
         var validMoves = new ArrayList<ChessMove>();
@@ -502,7 +517,7 @@ public class ChessRules {
                 var piece = board.getPiece(position);
                 if (piece != null) {
                     if (piece.getTeamColor() == teamColor) {
-                        this.getMovesFromRules(board, position);
+                        this.getBasicMoves(board, position);
                     }
                 }
             }
@@ -512,7 +527,7 @@ public class ChessRules {
 
     public Collection<ChessMove> getKingMovesAllChecks(ChessBoard board, ChessPosition kingPos) {
         var kingColor = board.getPiece(kingPos).getTeamColor();
-        var kingMoves = getMovesFromRules(board, kingPos);
+        var kingMoves = getBasicMoves(board, kingPos);
 
         ChessGame.TeamColor enemyColor = null;
 

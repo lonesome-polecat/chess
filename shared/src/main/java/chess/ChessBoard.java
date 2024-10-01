@@ -17,6 +17,19 @@ public class ChessBoard {
         
     }
 
+    public ChessBoard(ChessBoard board) {
+        for (int i = 1; i <= board.BOARD_SIZE; i++) {
+           var row = new ChessPiece[board.BOARD_SIZE];
+           for (int j = 1; j <= board.BOARD_SIZE; j++) {
+               var pos = new ChessPosition(i, j);
+               var val = board.getPiece(pos);
+               if (val != null) {
+                   squares[i-1][j-1] = new ChessPiece(val.getTeamColor(), val.getPieceType());
+               }
+           }
+        }
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *
@@ -38,6 +51,12 @@ public class ChessBoard {
     public ChessPiece getPiece(ChessPosition position) {
         return squares[position.getRow()-1][position.getColumn()-1];
         // throw new RuntimeException("Not implemented");
+    }
+
+    public void movePiece(ChessMove move) {
+        var piece = getPiece(move.getStartPosition());
+        addPiece(move.getEndPosition(), piece);
+        squares[move.getStartPosition().getRow()-1][move.getStartPosition().getColumn()-1] = null;
     }
 
     /**
