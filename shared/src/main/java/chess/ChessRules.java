@@ -539,7 +539,6 @@ public class ChessRules {
                 }
             }
         }
-        System.out.println(teamAttackVectors.get(teamColor));
     }
 
     public boolean isKingInCheck(ChessGame.TeamColor teamColor, ChessBoard board) {
