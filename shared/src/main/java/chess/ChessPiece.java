@@ -67,24 +67,11 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        String rules = getPieceRules();
-        ArrayList<ChessMove> validMoves =  ChessRules.getMovesFromRules(rules, board, myPosition);
+        var rules = new ChessRules();
+        ArrayList<ChessMove> validMoves =  rules.getMovesFromRules(board, myPosition);
 
         return validMoves;
     }
-
-    private String getPieceRules() {
-        PieceType piece = getPieceType();
-        return switch (piece) {
-            case KING -> "111k";
-            case QUEEN -> "111q";
-            case BISHOP -> "001b";
-            case KNIGHT -> "000n";
-            case ROOK -> "110r";
-            case PAWN -> "101p";
-        };
-    }
-
 
     @Override
     public String toString() {

@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -11,6 +12,7 @@ import java.util.Collection;
 public class ChessGame {
     private ChessBoard board = new ChessBoard();
     private TeamColor currTurn = TeamColor.WHITE;
+    private ChessRules rules = new ChessRules();
 
     public ChessGame() {
         board.resetBoard();
@@ -48,8 +50,7 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        var piece = board.getPiece(startPosition);
-        return piece.pieceMoves(board, startPosition);
+        return rules.getMovesFromRules(board, startPosition);
     }
 
     /**
@@ -69,7 +70,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        return ChessRules.isKingInCheck(teamColor, board);
+        return rules.isKingInCheck(teamColor, board);
     }
 
     /**
@@ -79,7 +80,13 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
+        var kingPosition = board.getSpecificPiecePosition(ChessPiece.PieceType.KING, teamColor);
+        var kingMoves = rules.getKingMovesAllChecks(board, kingPosition);
+        System.out.println(kingMoves);
+        return kingMoves.isEmpty();
     }
 
     /**
@@ -90,6 +97,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+
         throw new RuntimeException("Not implemented");
     }
 

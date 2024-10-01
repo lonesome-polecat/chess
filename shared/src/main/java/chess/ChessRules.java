@@ -3,9 +3,27 @@ package chess;
 import java.util.*;
 
 public class ChessRules {
+    private HashMap<ChessGame.TeamColor, HashSet<ChessPosition>> teamAttackVectors = new HashMap<>();
 
-    public static ArrayList<ChessMove> getMovesFromRules(String rules, ChessBoard board, ChessPosition startPos) {
+    public ChessRules() {
+        teamAttackVectors.put(ChessGame.TeamColor.WHITE, new HashSet<>());
+        teamAttackVectors.put(ChessGame.TeamColor.BLACK, new HashSet<>());
+    }
 
+    private String getPieceRules(ChessPiece.PieceType type) {
+        return switch (type) {
+            case KING -> "111k";
+            case QUEEN -> "111q";
+            case BISHOP -> "001b";
+            case KNIGHT -> "000n";
+            case ROOK -> "110r";
+            case PAWN -> "101p";
+        };
+    }
+
+    public ArrayList<ChessMove> getMovesFromRules(ChessBoard board, ChessPosition startPos) {
+
+        var rules = this.getPieceRules(board.getPiece(startPos).getPieceType());
         var validMoves = new ArrayList<ChessMove>();
 
         // first get rules for special characters
@@ -43,10 +61,12 @@ public class ChessRules {
         return validMoves;
     }
 
-    public static void getKingMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
+    public void getKingMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
 
         int startPosRow = startPos.getRow();
         int startPosColumn = startPos.getColumn();
+        var color = board.getPiece(startPos).getTeamColor();
+        var attackVectors =  new HashSet<ChessPosition>();
         // check all adjacent squares
         for (int row = startPosRow-1; row < startPosRow+2; row++) {
             if (row < 1 || row > 8) {
@@ -63,21 +83,28 @@ public class ChessRules {
                 ChessPiece pieceOnSquare = board.getPiece(possiblePos);
                 if (pieceOnSquare == null) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
                 } else {
                     // Only add possible move if the piece on square is an enemy piece
-                    if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                    if (pieceOnSquare.getTeamColor() != color) {
                         validMoves.add(new ChessMove(startPos, possiblePos, null));
+                        attackVectors.add(possiblePos);
+                    } else {
+                        attackVectors.add(possiblePos);
                     }
                     break;
                 }
             }
         }
+        teamAttackVectors.get(color).addAll(attackVectors);
     }
 
-    public static void getKnightMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
+    public void getKnightMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
 
         int row = startPos.getRow();
         int col = startPos.getColumn();
+        var color = board.getPiece(startPos).getTeamColor();
+        var attackVectors =  new HashSet<ChessPosition>();
 
         var colSpace = 0;
         for (int i = -2; i <= 2; i++) {
@@ -98,10 +125,14 @@ public class ChessRules {
                 ChessPiece pieceOnSquare = board.getPiece(possiblePos);
                 if (pieceOnSquare == null) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
                 } else {
                     // Only add possible move if the piece on square is an enemy piece
-                    if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                    if (pieceOnSquare.getTeamColor() != color) {
                         validMoves.add(new ChessMove(startPos, possiblePos, null));
+                        attackVectors.add(possiblePos);
+                    } else {
+                        attackVectors.add(possiblePos);
                     }
                 }
             }
@@ -111,20 +142,27 @@ public class ChessRules {
                 ChessPiece pieceOnSquare = board.getPiece(possiblePos);
                 if (pieceOnSquare == null) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
                 } else {
                     // Only add possible move if the piece on square is an enemy piece
-                    if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                    if (pieceOnSquare.getTeamColor() != color) {
                         validMoves.add(new ChessMove(startPos, possiblePos, null));
+                        attackVectors.add(possiblePos);
+                    } else {
+                        attackVectors.add(possiblePos);
                     }
                 }
             }
         }
+        teamAttackVectors.get(color).addAll(attackVectors);
     }
 
-    public static void getWhitePawnMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
+    public void getWhitePawnMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
 
         int row = startPos.getRow();
         int col = startPos.getColumn();
+        var color = board.getPiece(startPos).getTeamColor();
+        var attackVectors =  new HashSet<ChessPosition>();
 
         var promotionPieces = new ArrayList<ChessPiece.PieceType>();
         if (row + 1 == 8) {
@@ -161,10 +199,13 @@ public class ChessRules {
             pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare != null) {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     for (var promotionPiece : promotionPieces) {
                         validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
                     }
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
             }
         }
@@ -178,16 +219,21 @@ public class ChessRules {
                     for (var promotionPiece : promotionPieces) {
                         validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
                     }
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
             }
         }
+        teamAttackVectors.get(color).addAll(attackVectors);
     }
 
-
-    public static void getBlackPawnMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
+    public void getBlackPawnMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
 
         int row = startPos.getRow();
         int col = startPos.getColumn();
+        var color = board.getPiece(startPos).getTeamColor();
+        var attackVectors =  new HashSet<ChessPosition>();
 
         var promotionPieces = new ArrayList<ChessPiece.PieceType>();
         if (row - 1 == 1) {
@@ -228,6 +274,9 @@ public class ChessRules {
                     for (var promotionPiece : promotionPieces) {
                         validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
                     }
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
             }
         }
@@ -241,15 +290,22 @@ public class ChessRules {
                     for (var promotionPiece : promotionPieces) {
                         validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
                     }
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
             }
         }
+        teamAttackVectors.get(color).addAll(attackVectors);
     }
 
-    public static void getForwardBackMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
+    public void getForwardBackMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
 
         int row = startPos.getRow();
         int col = startPos.getColumn();
+        var color = board.getPiece(startPos).getTeamColor();
+        var attackVectors =  new HashSet<ChessPosition>();
+
         // first check down
         while (row > 1) {
             row -= 1;
@@ -257,10 +313,14 @@ public class ChessRules {
             ChessPiece pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare == null) {
                 validMoves.add(new ChessMove(startPos, possiblePos, null));
+                attackVectors.add(possiblePos);
             } else {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
                 break;
             }
@@ -273,20 +333,28 @@ public class ChessRules {
             ChessPiece pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare == null) {
                 validMoves.add(new ChessMove(startPos, possiblePos, null));
+                attackVectors.add(possiblePos);
             } else {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
                 break;
             }
         }
+        teamAttackVectors.get(color).addAll(attackVectors);
     }
 
-    public static void getRightLeftMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
+    public void getRightLeftMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
 
         int row = startPos.getRow();
         int col = startPos.getColumn();
+        var color = board.getPiece(startPos).getTeamColor();
+        var attackVectors =  new HashSet<ChessPosition>();
+
         // first check left
         while (col > 1) {
             col -= 1;
@@ -294,10 +362,14 @@ public class ChessRules {
             ChessPiece pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare == null) {
                 validMoves.add(new ChessMove(startPos, possiblePos, null));
+                attackVectors.add(possiblePos);
             } else {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
                 break;
             }
@@ -310,20 +382,28 @@ public class ChessRules {
             ChessPiece pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare == null) {
                 validMoves.add(new ChessMove(startPos, possiblePos, null));
+                attackVectors.add(possiblePos);
             } else {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
                 break;
             }
         }
+        teamAttackVectors.get(color).addAll(attackVectors);
     }
 
-    public static void getDiagonalMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
+    public void getDiagonalMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
 
         int row = startPos.getRow();
         int col = startPos.getColumn();
+        var color = board.getPiece(startPos).getTeamColor();
+        var attackVectors =  new HashSet<ChessPosition>();
+
         // first check down-left
         while (row > 1 && col > 1) {
             row -= 1;
@@ -332,10 +412,14 @@ public class ChessRules {
             ChessPiece pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare == null) {
                 validMoves.add(new ChessMove(startPos, possiblePos, null));
+                attackVectors.add(possiblePos);
             } else {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
                 break;
             }
@@ -350,10 +434,14 @@ public class ChessRules {
             ChessPiece pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare == null) {
                 validMoves.add(new ChessMove(startPos, possiblePos, null));
+                attackVectors.add(possiblePos);
             } else {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
                 break;
             }
@@ -368,10 +456,14 @@ public class ChessRules {
             ChessPiece pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare == null) {
                 validMoves.add(new ChessMove(startPos, possiblePos, null));
+                attackVectors.add(possiblePos);
             } else {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
                 break;
             }
@@ -386,58 +478,62 @@ public class ChessRules {
             ChessPiece pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare == null) {
                 validMoves.add(new ChessMove(startPos, possiblePos, null));
+                attackVectors.add(possiblePos);
             } else {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     validMoves.add(new ChessMove(startPos, possiblePos, null));
+                    attackVectors.add(possiblePos);
+                } else {
+                    attackVectors.add(possiblePos);
                 }
                 break;
             }
         }
+        teamAttackVectors.get(color).addAll(attackVectors);
     }
 
-    public static Collection<ChessMove> getTeamMoves(ChessGame.TeamColor teamColor, ChessBoard board) {
-        var teamMoves = new HashSet<ChessMove>();
+    private void updateTeamAttackVectors(ChessGame.TeamColor teamColor, ChessBoard board) {
+        // Clear attackVectors and reset
+        teamAttackVectors.get(teamColor).clear();
         for (int i = 1; i <= board.BOARD_SIZE; i++) {
             for (int j = 1; j <= board.BOARD_SIZE; j++) {
                 var position = new ChessPosition(i, j);
                 var piece = board.getPiece(position);
                 if (piece != null) {
                     if (piece.getTeamColor() == teamColor) {
-                        var moves = new HashSet<ChessMove>(piece.pieceMoves(board, position));
-                        teamMoves.addAll(moves);
+                        this.getMovesFromRules(board, position);
                     }
                 }
             }
         }
-        return teamMoves;
+        System.out.println(teamAttackVectors.get(teamColor));
     }
 
-    public static void removeKingMovesInHarmsWay(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition kingPos) {
+    public Collection<ChessMove> getKingMovesAllChecks(ChessBoard board, ChessPosition kingPos) {
         var kingColor = board.getPiece(kingPos).getTeamColor();
+        var kingMoves = getMovesFromRules(board, kingPos);
+
         ChessGame.TeamColor enemyColor = null;
 
         if (kingColor == ChessGame.TeamColor.WHITE) {
             enemyColor = ChessGame.TeamColor.BLACK;
-        }else {
+        } else {
             enemyColor = ChessGame.TeamColor.WHITE;
         }
-        var enemyMoves = getTeamMoves(enemyColor, board);
 
-        var enemyPositions = new HashSet<ChessPosition>();
-        for (var move : enemyMoves) {
-            enemyPositions.add(move.getEndPosition());
-        }
+        updateTeamAttackVectors(enemyColor, board);
 
-        for (var move : validMoves) {
-            if (enemyPositions.contains(move.getEndPosition())) {
-                validMoves.remove(move);
+        for (var move : kingMoves) {
+            var pos = move.getEndPosition();
+            if (teamAttackVectors.get(enemyColor).contains(pos)) {
+                kingMoves.remove(move);
             }
         }
+        return kingMoves;
     }
 
-    public static boolean isKingInCheck(ChessGame.TeamColor teamColor, ChessBoard board) {
-
+    public boolean isKingInCheck(ChessGame.TeamColor teamColor, ChessBoard board) {
         ChessGame.TeamColor enemyColor;
         if (teamColor == ChessGame.TeamColor.WHITE) {
             enemyColor = ChessGame.TeamColor.BLACK;
@@ -445,14 +541,9 @@ public class ChessRules {
             enemyColor = ChessGame.TeamColor.WHITE;
         }
 
-        var enemyMoves = getTeamMoves(enemyColor, board);
+        updateTeamAttackVectors(enemyColor, board);
 
         ChessPosition kingPosition = board.getSpecificPiecePosition(ChessPiece.PieceType.KING, teamColor);
-        var enemyPositions = new HashSet<ChessPosition>();
-        for (var move : enemyMoves) {
-            enemyPositions.add(move.getEndPosition());
-        }
-
-        return enemyPositions.contains(kingPosition);
+        return teamAttackVectors.get(enemyColor).contains(kingPosition);
     }
 }
