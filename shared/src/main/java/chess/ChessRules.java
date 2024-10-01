@@ -1,6 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class ChessRules {
 
@@ -394,5 +394,65 @@ public class ChessRules {
                 break;
             }
         }
+    }
+
+    public static Collection<ChessMove> getTeamMoves(ChessGame.TeamColor teamColor, ChessBoard board) {
+        var teamMoves = new HashSet<ChessMove>();
+        for (int i = 1; i <= board.BOARD_SIZE; i++) {
+            for (int j = 1; j <= board.BOARD_SIZE; j++) {
+                var position = new ChessPosition(i, j);
+                var piece = board.getPiece(position);
+                if (piece != null) {
+                    if (piece.getTeamColor() == teamColor) {
+                        var moves = new HashSet<ChessMove>(piece.pieceMoves(board, position));
+                        teamMoves.addAll(moves);
+                    }
+                }
+            }
+        }
+        return teamMoves;
+    }
+
+    public static void removeKingMovesInHarmsWay(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition kingPos) {
+        var kingColor = board.getPiece(kingPos).getTeamColor();
+        ChessGame.TeamColor enemyColor = null;
+
+        if (kingColor == ChessGame.TeamColor.WHITE) {
+            enemyColor = ChessGame.TeamColor.BLACK;
+        }else {
+            enemyColor = ChessGame.TeamColor.WHITE;
+        }
+        var enemyMoves = getTeamMoves(enemyColor, board);
+
+        var enemyPositions = new HashSet<ChessPosition>();
+        for (var move : enemyMoves) {
+            enemyPositions.add(move.getEndPosition());
+        }
+
+        for (var move : validMoves) {
+            if (enemyPositions.contains(move.getEndPosition())) {
+                validMoves.remove(move);
+            }
+        }
+    }
+
+    public static boolean isKingInCheck(ChessGame.TeamColor teamColor, ChessBoard board) {
+
+        ChessGame.TeamColor enemyColor;
+        if (teamColor == ChessGame.TeamColor.WHITE) {
+            enemyColor = ChessGame.TeamColor.BLACK;
+        } else {
+            enemyColor = ChessGame.TeamColor.WHITE;
+        }
+
+        var enemyMoves = getTeamMoves(enemyColor, board);
+
+        ChessPosition kingPosition = board.getSpecificPiecePosition(ChessPiece.PieceType.KING, teamColor);
+        var enemyPositions = new HashSet<ChessPosition>();
+        for (var move : enemyMoves) {
+            enemyPositions.add(move.getEndPosition());
+        }
+
+        return enemyPositions.contains(kingPosition);
     }
 }

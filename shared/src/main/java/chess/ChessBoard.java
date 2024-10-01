@@ -10,7 +10,8 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    private ChessPiece[][] squares = new ChessPiece[8][8];
+    public int BOARD_SIZE = 8;
+    private ChessPiece[][] squares = new ChessPiece[BOARD_SIZE][BOARD_SIZE];
 
     public ChessBoard() {
         
@@ -69,6 +70,23 @@ public class ChessBoard {
         for (int i = 0; i < 8; i++) {
             squares[6][i] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
         }
+    }
+
+    public ChessPosition getSpecificPiecePosition(ChessPiece.PieceType type, ChessGame.TeamColor teamColor) {
+        ChessPosition piecePosition = null;
+        for (int i = 1; i <= BOARD_SIZE; i++) {
+            for (int j = 1; j <= BOARD_SIZE; j++) {
+                var position = new ChessPosition(i, j);
+                var piece = getPiece(position);
+                if (piece != null) {
+                    if (piece.getPieceType() == type && piece.getTeamColor() == teamColor) {
+                        piecePosition = position;
+                        break;
+                    }
+                }
+            }
+        }
+        return piecePosition;
     }
 
     @Override
