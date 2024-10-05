@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -68,9 +67,7 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         var rules = new ChessRules();
-        ArrayList<ChessMove> validMoves =  rules.getBasicMoves(board, myPosition);
-
-        return validMoves;
+        return rules.getBasicMoves(board, myPosition);
     }
 
     @Override

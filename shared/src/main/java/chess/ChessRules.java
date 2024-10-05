@@ -209,8 +209,6 @@ public class ChessRules {
         // first check move forward (1 or 2 spaces)
         var possiblePos = new ChessPosition(row+1, col);
         ChessPiece pieceOnSquare = board.getPiece(possiblePos);
-        // System.out.printf("possiblePos = %s%n", possiblePos);
-        // System.out.printf("pieceOnSquare = %s%n", pieceOnSquare.toString());
         if (pieceOnSquare == null) {
             for (var promotionPiece : promotionPieces) {
                 validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
@@ -247,7 +245,7 @@ public class ChessRules {
             pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare != null) {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     for (var promotionPiece : promotionPieces) {
                         validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
                     }
@@ -302,7 +300,7 @@ public class ChessRules {
             pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare != null) {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     for (var promotionPiece : promotionPieces) {
                         validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
                     }
@@ -318,7 +316,7 @@ public class ChessRules {
             pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare != null) {
                 // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != board.getPiece(startPos).getTeamColor()) {
+                if (pieceOnSquare.getTeamColor() != color) {
                     for (var promotionPiece : promotionPieces) {
                         validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
                     }
