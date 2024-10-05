@@ -60,7 +60,6 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         var validMoves = rules.getTeamMoves(board, currTurn);
-        System.out.println(validMoves);
         if (!validMoves.contains(move)) {
             throw new InvalidMoveException(String.format("%s is not a valid move", move));
         }
