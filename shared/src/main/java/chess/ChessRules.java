@@ -6,6 +6,7 @@ public class ChessRules {
     private HashMap<ChessGame.TeamColor, HashSet<ChessPosition>> teamAttackVectors = new HashMap<>();
 
     public ChessRules() {
+        // This teamAttackVectors property is just for checking if the King is in check
         teamAttackVectors.put(ChessGame.TeamColor.WHITE, new HashSet<>());
         teamAttackVectors.put(ChessGame.TeamColor.BLACK, new HashSet<>());
     }
@@ -39,9 +40,11 @@ public class ChessRules {
     }
 
     public ArrayList<ChessMove> getMoves(ChessBoard board, ChessPosition startPos) {
+        // First get typical movements without accounting for king in check
         var validMoves = getBasicMoves(board, startPos);
         var color = board.getPiece(startPos).getTeamColor();
         var iter = validMoves.iterator();
+        // Now check each move to see if it is still valid when taking the king into consideration
         while (iter.hasNext()) {
             var move = iter.next();
             var whatIfBoard = new ChessBoard(board);
@@ -54,7 +57,7 @@ public class ChessRules {
     }
 
     public ArrayList<ChessMove> getBasicMoves(ChessBoard board, ChessPosition startPos) {
-
+        // Get typical movements for a piece regardless of king in check or not
         var rules = this.getPieceRules(board.getPiece(startPos).getPieceType());
         var validMoves = new ArrayList<ChessMove>();
 
