@@ -2,10 +2,12 @@ package server;
 
 import jdk.jshell.spi.ExecutionControl;
 import model.UserData;
+import service.AuthService;
 import spark.*;
 import com.google.gson.Gson;
 
 public class Server {
+
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -31,7 +33,8 @@ public class Server {
 
     private Object registerUser(Request request, Response response) {
         var userData = new Gson().fromJson(request.body(), UserData.class);
-        return "Hello";
+        var service = new AuthService();
+        return service.registerRequest(userData);
     }
 
     private Object loginUser(Request request, Response response) throws ExecutionControl.NotImplementedException {
