@@ -6,6 +6,7 @@ import model.UserData;
 import server.ResponseException;
 
 import java.util.Objects;
+import java.util.Set;
 
 public class AuthService {
     private final DataAccess.AuthDAO authDAO;
@@ -45,9 +46,16 @@ public class AuthService {
         }
     }
 
+    public RegisterResponse logoutRequest(AuthData authData) throws ResponseException {
+        throw new ResponseException(401, "Error: unauthorized");
+    }
+
     public void clearDB() {
         authDAO.clearAllAuth();
         userDAO.clearAllUsers();
         gameDAO.clearAllGames();
+    }
+
+    public void verifyAuthToken(Set<String> headers) throws ResponseException {
     }
 }

@@ -2,9 +2,12 @@ package server;
 
 import dataaccess.MemoryDataAccess;
 import jdk.jshell.spi.ExecutionControl;
-import model.ErrorResponse;
+import model.GameData;
+import service.ErrorResponse;
 import model.UserData;
 import service.AuthService;
+import service.GameService;
+import service.NewGameResponse;
 import spark.*;
 import com.google.gson.Gson;
 
@@ -15,6 +18,7 @@ public class Server {
     private final MemoryDataAccess.GameDAO gameDAO = new MemoryDataAccess.GameDAO();
 
     private AuthService authService = new AuthService(authDAO, userDAO, gameDAO);
+    private GameService gameService = new GameService(authDAO, userDAO, gameDAO);
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -62,8 +66,11 @@ public class Server {
         throw new ExecutionControl.NotImplementedException("");
     }
 
-    private Object createGame(Request request, Response response) throws ExecutionControl.NotImplementedException {
-        throw new ExecutionControl.NotImplementedException("");
+    private Object createGame(Request request, Response response) throws ResponseException {
+        authService.verifyAuthToken(request.headers());
+        var gameData = new Gson().fromJson(request.body(), GameData.class);
+        NewGameResponse res = gameService.newGameRequest(gameData);
+        return new Gson().toJson(res);
     }
 
     private Object joinGame(Request request, Response response) throws ExecutionControl.NotImplementedException {

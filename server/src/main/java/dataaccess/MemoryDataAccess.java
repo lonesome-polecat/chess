@@ -44,11 +44,16 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     public static class GameDAO extends DataAccess.GameDAO {
-        private final HashMap<String, GameData> gameMap = new HashMap<String, GameData>();
+        private final HashMap<Integer, GameData> gameMap = new HashMap<Integer, GameData>();
+        private int gameID = 0;
 
         public GameData createGame(GameData gameData) {
-            var newGame = new ChessGame();
-            return new GameData(gameData.gameId(), "", "", "", newGame);
+            var game = new ChessGame();
+            gameID++;
+            System.out.println(gameID);
+            var newGame = new GameData(gameID, "", "", "", game);
+            gameMap.put(gameID, newGame);
+            return newGame;
         }
 
         public Collection<GameData> getGames() {
@@ -57,6 +62,7 @@ public class MemoryDataAccess implements DataAccess {
 
         public void clearAllGames() {
             gameMap.clear();
+            gameID = 0;
         }
     }
 }
