@@ -1,5 +1,6 @@
 package server;
 
+import dataaccess.MemoryDataAccess;
 import jdk.jshell.spi.ExecutionControl;
 import model.UserData;
 import service.AuthService;
@@ -8,8 +9,10 @@ import com.google.gson.Gson;
 
 public class Server {
 
-    private AuthService authService = new AuthService();
+    private final MemoryDataAccess.AuthDAO authDAO = new MemoryDataAccess.AuthDAO();
+    private final MemoryDataAccess.UserDAO userDAO = new MemoryDataAccess.UserDAO();
 
+    private AuthService authService = new AuthService(authDAO, userDAO);
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);

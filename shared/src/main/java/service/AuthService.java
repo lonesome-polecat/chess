@@ -1,14 +1,18 @@
 package service;
 
-import dataaccess.MemoryDataAccess;
+import dataaccess.DataAccess;
 import model.AuthData;
 import model.UserData;
 import server.ResponseException;
 
 public class AuthService {
+    private final DataAccess.AuthDAO authDAO;
+    private final DataAccess.UserDAO userDAO;
 
-    private final MemoryDataAccess.AuthDAO authDAO = new MemoryDataAccess.AuthDAO();
-    private final MemoryDataAccess.UserDAO userDAO = new MemoryDataAccess.UserDAO();
+    public AuthService(DataAccess.AuthDAO authDAO, DataAccess.UserDAO userDAO) {
+        this.authDAO = authDAO;
+        this.userDAO = userDAO;
+    }
 
     public RegisterResponse registerRequest(UserData userData) throws ResponseException {
         var existingUser = userDAO.getUser(userData);

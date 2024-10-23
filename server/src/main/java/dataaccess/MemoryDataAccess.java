@@ -6,8 +6,9 @@ import model.UserData;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class MemoryDataAccess {
-    public static class AuthDAO {
+public class MemoryDataAccess implements DataAccess {
+
+    public static class AuthDAO extends DataAccess.AuthDAO {
 
         private final HashMap<String, AuthData> authDataMap = new HashMap<String, AuthData>();
 
@@ -19,7 +20,7 @@ public class MemoryDataAccess {
         }
     }
 
-    public static class UserDAO {
+    public static class UserDAO extends DataAccess.UserDAO {
         private final HashMap<String, UserData> userMap = new HashMap<String, UserData>();
 
         public UserData getUser(UserData userData) {
