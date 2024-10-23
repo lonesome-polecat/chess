@@ -56,8 +56,8 @@ public class AuthServiceTest {
             authService.registerRequest(userData);
         });
 
-        assertEquals(400, thrown.StatusCode());
-        assertEquals("This username has already been used. Choose a different one", thrown.getMessage());
+        assertEquals(403, thrown.StatusCode());
+        assertEquals( "Error: already taken", thrown.getMessage());
     }
 
      @Test

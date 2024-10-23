@@ -2,6 +2,7 @@ package server;
 
 import dataaccess.MemoryDataAccess;
 import jdk.jshell.spi.ExecutionControl;
+import model.ErrorResponse;
 import model.UserData;
 import service.AuthService;
 import spark.*;
@@ -37,7 +38,8 @@ public class Server {
     private void exceptionHandler(ResponseException ex, Request req, Response res) {
         res.status(ex.StatusCode());
         res.type("application/json");
-        res.body(ex.getMessage());
+        var response = new ErrorResponse(ex.getMessage());
+        res.body(new Gson().toJson(response));
     }
 
     private Object registerUser(Request request, Response response) throws ResponseException {
@@ -70,7 +72,7 @@ public class Server {
 
     private Object clearDB(Request request, Response response) throws ResponseException {
         authService.clearDB();
-        return "";
+        return "{}";
     }
 
     public void stop() {

@@ -26,7 +26,7 @@ public class AuthService {
             AuthData authData = authDAO.createAuth(userData);
             return new RegisterResponse(authData);
         } else {
-            throw new ResponseException(400, "This username has already been used. Choose a different one");
+            throw new ResponseException(403, "Error: already taken");
         }
     }
 
@@ -34,14 +34,14 @@ public class AuthService {
         var existingUser = userDAO.getUser(userData);
 
         if (existingUser == null) {
-            throw new ResponseException(401, "Invalid username or password");
+            throw new ResponseException(401, "Error: unauthorized");
         }
 
         if (Objects.equals(existingUser.password(), userData.password())) {
             AuthData authData = authDAO.createAuth(userData);
             return new RegisterResponse(authData);
         } else {
-            throw new ResponseException(401, "Invalid username or password");
+            throw new ResponseException(401, "Error: unauthorized");
         }
     }
 
