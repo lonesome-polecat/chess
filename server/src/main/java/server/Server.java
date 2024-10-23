@@ -2,7 +2,6 @@ package server;
 
 import jdk.jshell.spi.ExecutionControl;
 import model.UserData;
-import model.AuthData;
 import service.AuthService;
 import spark.*;
 import com.google.gson.Gson;
@@ -26,12 +25,16 @@ public class Server {
         Spark.post("/game", this::createGame);
         Spark.put("/game", this::joinGame);
         Spark.delete("/db", this::clearDB);
-
-        //This line initializes the server and can be removed once you have a functioning endpoint 
-        Spark.init();
+        Spark.exception(ResponseException.class, this::exceptionHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
+    }
+
+    private void exceptionHandler(ResponseException ex, Request req, Response res) {
+        res.status(ex.StatusCode());
+        res.type("application/json");
+        res.body(ex.getMessage());
     }
 
     private Object registerUser(Request request, Response response) throws ResponseException {
