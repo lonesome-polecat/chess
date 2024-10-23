@@ -59,4 +59,55 @@ public class AuthServiceTest {
         assertEquals(400, thrown.StatusCode());
         assertEquals("This username has already been used. Choose a different one", thrown.getMessage());
     }
+
+     @Test
+    public void testLoginRequest_Success() throws Exception {
+        // Arrange
+        UserData userData = new UserData("loginUser", "password123", "login@example.com");
+
+        // Register the user first so they exist in the database
+        authService.registerRequest(userData);
+
+        // Act
+        RegisterResponse response = authService.loginRequest(userData);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals("loginUser", response.username);
+        assertNotNull(response.authToken);
+    }
+
+    @Test
+    public void testLoginRequest_ThrowsException_InvalidPassword() throws Exception {
+        // Arrange
+        UserData validUserData = new UserData("loginUser", "password123", "login@example.com");
+
+        // Register the user with a valid password
+        authService.registerRequest(validUserData);
+
+        // Try to log in with an invalid password
+        UserData invalidUserData = new UserData("loginUser", "wrongpassword", "login@example.com");
+
+        // Act & Assert
+        ResponseException thrown = assertThrows(ResponseException.class, () -> {
+            authService.loginRequest(invalidUserData);
+        });
+
+        assertEquals(401, thrown.StatusCode());
+        assertEquals("Invalid username or password", thrown.getMessage());
+    }
+     @Test
+    public void testLoginRequest_ThrowsException_UnregisteredUser() throws Exception {
+        // Arrange
+        // Try to log in with an unregistered user
+        UserData invalidUserData = new UserData("loginUser", "wrongpassword", "login@example.com");
+
+        // Act & Assert
+        ResponseException thrown = assertThrows(ResponseException.class, () -> {
+            authService.loginRequest(invalidUserData);
+        });
+
+        assertEquals(401, thrown.StatusCode());
+        assertEquals("Invalid username or password", thrown.getMessage());
+    }
 }

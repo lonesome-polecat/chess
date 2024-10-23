@@ -46,8 +46,10 @@ public class Server {
         return new Gson().toJson(registerResponse);
     }
 
-    private Object loginUser(Request request, Response response) throws ExecutionControl.NotImplementedException {
-        throw new ExecutionControl.NotImplementedException("");
+    private Object loginUser(Request request, Response response) throws ResponseException {
+        var userData = new Gson().fromJson(request.body(), UserData.class);
+        var registerResponse = authService.loginRequest(userData);
+        return new Gson().toJson(registerResponse);
     }
 
     private Object logoutUser(Request request, Response response) throws ExecutionControl.NotImplementedException {

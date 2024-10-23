@@ -5,6 +5,8 @@ import model.AuthData;
 import model.UserData;
 import server.ResponseException;
 
+import java.util.Objects;
+
 public class AuthService {
     private final DataAccess.AuthDAO authDAO;
     private final DataAccess.UserDAO userDAO;
@@ -25,6 +27,21 @@ public class AuthService {
             return new RegisterResponse(authData);
         } else {
             throw new ResponseException(400, "This username has already been used. Choose a different one");
+        }
+    }
+
+    public RegisterResponse loginRequest(UserData userData) throws ResponseException {
+        var existingUser = userDAO.getUser(userData);
+
+        if (existingUser == null) {
+            throw new ResponseException(401, "Invalid username or password");
+        }
+
+        if (Objects.equals(existingUser.password(), userData.password())) {
+            AuthData authData = authDAO.createAuth(userData);
+            return new RegisterResponse(authData);
+        } else {
+            throw new ResponseException(401, "Invalid username or password");
         }
     }
 
