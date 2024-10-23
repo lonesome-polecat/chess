@@ -23,6 +23,8 @@ public class MemoryDataAccess {
         private final HashMap<String, UserData> userMap = new HashMap<String, UserData>();
 
         public UserData getUser(UserData userData) {
+            System.out.println(userMap);
+            System.out.println(userData);
             return userMap.get(userData.username());
         }
 

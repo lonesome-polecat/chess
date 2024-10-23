@@ -9,6 +9,8 @@ import com.google.gson.Gson;
 
 public class Server {
 
+    private AuthService authService = new AuthService();
+
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -34,8 +36,7 @@ public class Server {
 
     private Object registerUser(Request request, Response response) throws ResponseException {
         var userData = new Gson().fromJson(request.body(), UserData.class);
-        var service = new AuthService();
-        var registerResponse = service.registerRequest(userData);
+        var registerResponse = authService.registerRequest(userData);
         return new Gson().toJson(registerResponse);
     }
 
