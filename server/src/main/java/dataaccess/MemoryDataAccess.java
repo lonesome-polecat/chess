@@ -1,8 +1,11 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -24,13 +27,24 @@ public class MemoryDataAccess implements DataAccess {
         private final HashMap<String, UserData> userMap = new HashMap<String, UserData>();
 
         public UserData getUser(UserData userData) {
-            System.out.println(userMap);
-            System.out.println(userData);
             return userMap.get(userData.username());
         }
 
         public void createUser(UserData userData) {
             userMap.put(userData.username(), userData);
+        }
+    }
+
+    public static class GameDAO extends DataAccess.GameDAO {
+        private final HashMap<String, GameData> gameMap = new HashMap<String, GameData>();
+
+        public GameData createGame(GameData gameData) {
+            var newGame = new ChessGame();
+            return new GameData(gameData.gameId(), "", "", "", newGame);
+        }
+
+        public Collection<GameData> getGames() {
+            return (Collection<GameData>) gameMap;
         }
     }
 }
