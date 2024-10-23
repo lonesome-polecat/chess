@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.MemoryDataAccess;
+import server.ResponseException;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,17 +10,18 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AuthServiceTest {
     private final MemoryDataAccess.AuthDAO authDAO = new MemoryDataAccess.AuthDAO();
     private final MemoryDataAccess.UserDAO userDAO = new MemoryDataAccess.UserDAO();
+    private final MemoryDataAccess.GameDAO gameDAO = new MemoryDataAccess.GameDAO();
 
     private AuthService authService;
 
     @BeforeEach
     public void setUp() {
         // Initialize the real AuthService
-        authService = new AuthService(authDAO, userDAO);
+        authService = new AuthService(authDAO, userDAO, gameDAO);
 
         // Optionally, clear the database before each test to ensure a known state
         // This assumes clearDB() is a method to clear/reset the database
-        MemoryDataAccess.clearDB();
+        authService.clearDB();
     }
 
     @Test
@@ -32,8 +34,8 @@ public class AuthServiceTest {
 
         // Assert
         assertNotNull(response);
-        assertEquals("newUser", response.getUsername());
-        assertNotNull(response.getAuthToken());
+        assertEquals("newUser", response.username);
+        assertNotNull(response.authToken);
     }
 
     @Test

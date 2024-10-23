@@ -8,10 +8,12 @@ import server.ResponseException;
 public class AuthService {
     private final DataAccess.AuthDAO authDAO;
     private final DataAccess.UserDAO userDAO;
+    private final DataAccess.GameDAO gameDAO;
 
-    public AuthService(DataAccess.AuthDAO authDAO, DataAccess.UserDAO userDAO) {
+    public AuthService(DataAccess.AuthDAO authDAO, DataAccess.UserDAO userDAO, DataAccess.GameDAO gameDAO) {
         this.authDAO = authDAO;
         this.userDAO = userDAO;
+        this.gameDAO = gameDAO;
     }
 
     public RegisterResponse registerRequest(UserData userData) throws ResponseException {
@@ -24,5 +26,11 @@ public class AuthService {
         } else {
             throw new ResponseException(400, "This username has already been used. Choose a different one");
         }
+    }
+
+    public void clearDB() {
+        authDAO.clearAllAuth();
+        userDAO.clearAllUsers();
+        gameDAO.clearAllGames();
     }
 }

@@ -11,8 +11,9 @@ public class Server {
 
     private final MemoryDataAccess.AuthDAO authDAO = new MemoryDataAccess.AuthDAO();
     private final MemoryDataAccess.UserDAO userDAO = new MemoryDataAccess.UserDAO();
+    private final MemoryDataAccess.GameDAO gameDAO = new MemoryDataAccess.GameDAO();
 
-    private AuthService authService = new AuthService(authDAO, userDAO);
+    private AuthService authService = new AuthService(authDAO, userDAO, gameDAO);
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -65,8 +66,9 @@ public class Server {
         throw new ExecutionControl.NotImplementedException("");
     }
 
-    private Object clearDB(Request request, Response response) throws ExecutionControl.NotImplementedException {
-        throw new ExecutionControl.NotImplementedException("");
+    private Object clearDB(Request request, Response response) throws ResponseException {
+        authService.clearDB();
+        return "";
     }
 
     public void stop() {

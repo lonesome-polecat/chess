@@ -21,6 +21,10 @@ public class MemoryDataAccess implements DataAccess {
             authDataMap.put(userData.username(), authData);
             return authData;
         }
+
+        public void clearAllAuth() {
+            authDataMap.clear();
+        }
     }
 
     public static class UserDAO extends DataAccess.UserDAO {
@@ -32,6 +36,10 @@ public class MemoryDataAccess implements DataAccess {
 
         public void createUser(UserData userData) {
             userMap.put(userData.username(), userData);
+        }
+
+        public void clearAllUsers() {
+            userMap.clear();
         }
     }
 
@@ -45,6 +53,10 @@ public class MemoryDataAccess implements DataAccess {
 
         public Collection<GameData> getGames() {
             return (Collection<GameData>) gameMap;
+        }
+
+        public void clearAllGames() {
+            gameMap.clear();
         }
     }
 }
