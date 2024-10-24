@@ -7,13 +7,9 @@ import server.ResponseException;
 import java.util.Objects;
 
 public class GameService {
-    private final DataAccess.AuthDAO authDAO;
-    private final DataAccess.UserDAO userDAO;
     private final DataAccess.GameDAO gameDAO;
 
-    public GameService(DataAccess.AuthDAO authDAO, DataAccess.UserDAO userDAO, DataAccess.GameDAO gameDAO) {
-        this.authDAO = authDAO;
-        this.userDAO = userDAO;
+    public GameService(DataAccess.GameDAO gameDAO) {
         this.gameDAO = gameDAO;
     }
 

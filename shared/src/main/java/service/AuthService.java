@@ -6,9 +6,7 @@ import model.UserData;
 import server.ResponseException;
 import spark.Request;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 public class AuthService {
     private final DataAccess.AuthDAO authDAO;
@@ -51,10 +49,6 @@ public class AuthService {
         }
     }
 
-    public void logoutRequest(AuthData authData) throws ResponseException {
-        authDAO.deleteAuth(authData.authToken());
-    }
-
     public void clearDB() {
         authDAO.clearAllAuth();
         userDAO.clearAllUsers();
@@ -74,7 +68,7 @@ public class AuthService {
         }
     }
 
-    public void logoutRequest(String authToken) throws ResponseException {
+    public void logoutRequest(String authToken) {
         authDAO.deleteAuth(authToken);
     }
 }

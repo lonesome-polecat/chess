@@ -4,8 +4,6 @@ import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.ResponseException;
-import service.GameService;
-import service.NewGameResponse;
 import dataaccess.MemoryDataAccess;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +16,7 @@ public class GameServiceTest {
     @BeforeEach
     public void setUp() {
         gameDAO = new MemoryDataAccess.GameDAO();
-        gameService = new GameService(null, null, gameDAO);  // Assuming authDAO and userDAO are not used in this test
+        gameService = new GameService(gameDAO);  // Assuming authDAO and userDAO are not used in this test
     }
 
     @Test

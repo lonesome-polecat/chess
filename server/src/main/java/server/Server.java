@@ -1,7 +1,6 @@
 package server;
 
 import dataaccess.MemoryDataAccess;
-import jdk.jshell.spi.ExecutionControl;
 import model.GameData;
 import service.*;
 import model.UserData;
@@ -14,8 +13,8 @@ public class Server {
     private final MemoryDataAccess.UserDAO userDAO = new MemoryDataAccess.UserDAO();
     private final MemoryDataAccess.GameDAO gameDAO = new MemoryDataAccess.GameDAO();
 
-    private AuthService authService = new AuthService(authDAO, userDAO, gameDAO);
-    private GameService gameService = new GameService(authDAO, userDAO, gameDAO);
+    private final AuthService authService = new AuthService(authDAO, userDAO, gameDAO);
+    private final GameService gameService = new GameService(gameDAO);
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -81,7 +80,7 @@ public class Server {
         return "{}";
     }
 
-    private Object clearDB(Request request, Response response) throws ResponseException {
+    private Object clearDB(Request request, Response response) {
         authService.clearDB();
         return "{}";
     }

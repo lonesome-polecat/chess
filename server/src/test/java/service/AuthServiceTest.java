@@ -20,7 +20,7 @@ public class AuthServiceTest {
     public void setUp() {
         // Initialize the real AuthService
         authService = new AuthService(authDAO, userDAO, gameDAO);
-        gameService = new GameService(authDAO, userDAO, gameDAO);
+        gameService = new GameService(gameDAO);
 
         // Optionally, clear the database before each test to ensure a known state
         // This assumes clearDB() is a method to clear/reset the database
@@ -97,7 +97,7 @@ public class AuthServiceTest {
         });
 
         assertEquals(401, thrown.StatusCode());
-        assertEquals("Invalid username or password", thrown.getMessage());
+        assertEquals("Error: unauthorized", thrown.getMessage());
     }
      @Test
     public void testLoginRequest_ThrowsException_UnregisteredUser() throws Exception {
@@ -111,7 +111,7 @@ public class AuthServiceTest {
         });
 
         assertEquals(401, thrown.StatusCode());
-        assertEquals("Invalid username or password", thrown.getMessage());
+        assertEquals("Error: unauthorized", thrown.getMessage());
     }
 
    @Test
