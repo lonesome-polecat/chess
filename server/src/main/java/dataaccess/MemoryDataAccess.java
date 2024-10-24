@@ -5,25 +5,27 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class MemoryDataAccess implements DataAccess {
 
     public static class AuthDAO extends DataAccess.AuthDAO {
 
-        private final HashMap<String, AuthData> authDataMap = new HashMap<String, AuthData>();
+        private final HashMap<String, AuthData> authMap = new HashMap<String, AuthData>();
 
         public AuthData createAuth(UserData userData) {
             var authToken = UUID.randomUUID().toString();
             var authData = new AuthData(authToken, userData.username());
-            authDataMap.put(userData.username(), authData);
+            authMap.put(authToken, authData);
             return authData;
         }
 
+        public AuthData getAuth(String authToken) {
+            return authMap.get(authToken);
+        }
+
         public void clearAllAuth() {
-            authDataMap.clear();
+            authMap.clear();
         }
     }
 
@@ -51,13 +53,25 @@ public class MemoryDataAccess implements DataAccess {
             var game = new ChessGame();
             gameID++;
             System.out.println(gameID);
-            var newGame = new GameData(gameID, "", "", "", game);
+            var newGame = new GameData(gameID, "", "", gameData.gameName(), game);
             gameMap.put(gameID, newGame);
             return newGame;
         }
 
-        public Collection<GameData> getGames() {
-            return (Collection<GameData>) gameMap;
+        public void updateGame(GameData gameData) {
+            gameMap.put(gameData.gameId(), gameData);
+        }
+
+        public GameData getGame(int gameId) {
+            return gameMap.get(gameId);
+        }
+
+        public List<GameData> getGames() {
+            LinkedList<GameData> gameList= new LinkedList<GameData>();
+            for (int i = 1; i <= gameID; i++) {
+                gameList.add(gameMap.get(i));
+            }
+            return gameList;
         }
 
         public void clearAllGames() {

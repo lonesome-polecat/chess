@@ -3,11 +3,8 @@ package server;
 import dataaccess.MemoryDataAccess;
 import jdk.jshell.spi.ExecutionControl;
 import model.GameData;
-import service.ErrorResponse;
+import service.*;
 import model.UserData;
-import service.AuthService;
-import service.GameService;
-import service.NewGameResponse;
 import spark.*;
 import com.google.gson.Gson;
 
@@ -62,19 +59,24 @@ public class Server {
         throw new ExecutionControl.NotImplementedException("");
     }
 
-    private Object listGames(Request request, Response response) throws ExecutionControl.NotImplementedException {
-        throw new ExecutionControl.NotImplementedException("");
+    private Object listGames(Request request, Response response) throws ResponseException {
+        authService.verifyAuthToken(request);
+        ListGamesResponse res = gameService.listGamesRequest();
+        return new Gson().toJson(res);
     }
 
     private Object createGame(Request request, Response response) throws ResponseException {
-        authService.verifyAuthToken(request.headers());
+        authService.verifyAuthToken(request);
         var gameData = new Gson().fromJson(request.body(), GameData.class);
         NewGameResponse res = gameService.newGameRequest(gameData);
         return new Gson().toJson(res);
     }
 
-    private Object joinGame(Request request, Response response) throws ExecutionControl.NotImplementedException {
-        throw new ExecutionControl.NotImplementedException("");
+    private Object joinGame(Request request, Response response) throws ResponseException {
+        var username = authService.verifyAuthToken(request);
+        var joinRequest = new Gson().fromJson(request.body(), JoinGameRequest.class);
+        gameService.joinGame(joinRequest, username);
+        return "{}";
     }
 
     private Object clearDB(Request request, Response response) throws ResponseException {

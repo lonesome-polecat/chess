@@ -4,7 +4,9 @@ import dataaccess.DataAccess;
 import model.AuthData;
 import model.UserData;
 import server.ResponseException;
+import spark.Request;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -56,6 +58,16 @@ public class AuthService {
         gameDAO.clearAllGames();
     }
 
-    public void verifyAuthToken(Set<String> headers) throws ResponseException {
+    public String verifyAuthToken(Request request) throws ResponseException {
+        if (request.headers().contains("Authorization")) {
+            var authToken = request.headers("Authorization");
+            var authData = authDAO.getAuth(authToken);
+            if (authData == null) {
+                throw new ResponseException(401, "Error: unauthorized");
+            }
+            return authData.username();
+        } else {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
     }
 }
