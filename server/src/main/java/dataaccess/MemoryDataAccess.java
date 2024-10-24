@@ -57,7 +57,7 @@ public class MemoryDataAccess implements DataAccess {
             var game = new ChessGame();
             gameID++;
             System.out.println(gameID);
-            var newGame = new GameData(gameID, "", "", gameData.gameName(), game);
+            var newGame = new GameData(gameID, null, null, gameData.gameName(), game);
             gameMap.put(gameID, newGame);
             return newGame;
         }

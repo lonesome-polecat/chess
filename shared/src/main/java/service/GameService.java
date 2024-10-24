@@ -18,7 +18,7 @@ public class GameService {
     }
 
     public NewGameResponse newGameRequest(GameData gameData) throws ResponseException {
-        if (gameData.gameName() != null && gameData.gameName().matches("^[a-zA-Z0-9]+$")) {
+        if (gameData.gameName() != null && gameData.gameName().matches("^[a-zA-Z0-9\\s]*$")) {
             var newGame = gameDAO.createGame(gameData);
             return new NewGameResponse(newGame.gameId());
         } else {
@@ -32,21 +32,24 @@ public class GameService {
     }
 
     public void joinGame(JoinGameRequest request, String username) throws ResponseException {
-        var existingGame = gameDAO.getGame(Integer.parseInt(request.gameId()));
+        if (request.gameID() == null) {
+            throw new ResponseException(400, "Error: bad request");
+        }
 
+        var existingGame = gameDAO.getGame(Integer.parseInt(request.gameID()));
         if (existingGame == null) {
             throw new ResponseException(400, "Error: bad request");
         }
 
         if (Objects.equals(request.playerColor(), "WHITE")) {
-            if (!Objects.equals(existingGame.whiteUsername(), "")) {
+            if (existingGame.whiteUsername() != null) {
                 throw new ResponseException(403, "Error: already taken");
             } else {
                 var modGame = new GameData(existingGame.gameId(), username, existingGame.blackUsername(), existingGame.gameName(), existingGame.game());
                 gameDAO.updateGame(modGame);
             }
         } else if (Objects.equals(request.playerColor(), "BLACK")) {
-            if (!Objects.equals(existingGame.blackUsername(), "")) {
+            if (existingGame.blackUsername() != null) {
                 throw new ResponseException(403, "Error: already taken");
             } else {
                 var modGame = new GameData(existingGame.gameId(), existingGame.whiteUsername(), username, existingGame.gameName(), existingGame.game());

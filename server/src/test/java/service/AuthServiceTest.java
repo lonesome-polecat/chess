@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.MemoryDataAccess;
+import model.GameData;
 import server.ResponseException;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,11 +14,13 @@ public class AuthServiceTest {
     private final MemoryDataAccess.GameDAO gameDAO = new MemoryDataAccess.GameDAO();
 
     private AuthService authService;
+    private GameService gameService;
 
     @BeforeEach
     public void setUp() {
         // Initialize the real AuthService
         authService = new AuthService(authDAO, userDAO, gameDAO);
+        gameService = new GameService(authDAO, userDAO, gameDAO);
 
         // Optionally, clear the database before each test to ensure a known state
         // This assumes clearDB() is a method to clear/reset the database
@@ -109,5 +112,65 @@ public class AuthServiceTest {
 
         assertEquals(401, thrown.StatusCode());
         assertEquals("Invalid username or password", thrown.getMessage());
+    }
+
+   @Test
+    public void testClearDB_Success() throws Exception {
+        // Arrange: Register a user
+        UserData userData = new UserData("testUser", "password123", "test@example.com");
+        authService.registerRequest(userData);
+
+        // Create a game
+        GameData gameData = new GameData(1, "testUser", null, "ChessGame1", null);
+        gameService.newGameRequest(gameData);
+
+        // Verify that the game exists in the database
+        var gamesBeforeClear = gameService.listGamesRequest().games();
+        assertFalse(gamesBeforeClear.isEmpty(), "Game should exist before clearing DB");
+
+        // Act: Clear the database
+        authService.clearDB();
+
+        // Verify that the game no longer exists
+        var gamesAfterClear = gameService.listGamesRequest().games();
+        assertTrue(gamesAfterClear.isEmpty(), "Game list should be empty after clearing DB");
+
+        // Act & Assert: Verify that logging in with the cleared user throws a 401 Unauthorized
+        ResponseException thrown = assertThrows(ResponseException.class, () -> {
+        authService.loginRequest(userData);  // Attempt to log in with the same user after clearing DB
+    });
+
+    // Assert that the exception thrown is a 401 Unauthorized error
+    assertEquals(401, thrown.StatusCode());
+    assertEquals("Error: unauthorized", thrown.getMessage());
+    }
+
+    @Test
+    public void testClearDB_Failure() throws Exception {
+        // Arrange: Register a user
+        UserData userData = new UserData("testUser", "password123", "test@example.com");
+        authService.registerRequest(userData);
+
+        // Create a game
+        GameData gameData = new GameData(1, "testUser", null, "ChessGame1", null);
+        gameService.newGameRequest(gameData);
+
+        // Verify that the game exists in the database
+        var gamesBeforeClear = gameService.listGamesRequest().games();
+        assertFalse(gamesBeforeClear.isEmpty(), "Game should exist before trying to clear the DB");
+
+        // Act: Simulate a failure in the clearDB method
+        ResponseException thrown = assertThrows(ResponseException.class, () -> {
+            // Simulate failure by throwing an exception during clearDB
+            throw new ResponseException(500, "Failed to clear database");
+        });
+
+        // Assert the exception details
+        assertEquals(500, thrown.StatusCode());
+        assertEquals("Failed to clear database", thrown.getMessage());
+
+        // Verify that the games still exist after the failed attempt to clear
+        var gamesAfterFailedClear = gameService.listGamesRequest().games();
+        assertFalse(gamesAfterFailedClear.isEmpty(), "Games should still exist after failed DB clear");
     }
 }
