@@ -55,8 +55,10 @@ public class Server {
         return new Gson().toJson(registerResponse);
     }
 
-    private Object logoutUser(Request request, Response response) throws ExecutionControl.NotImplementedException {
-        throw new ExecutionControl.NotImplementedException("");
+    private Object logoutUser(Request request, Response response) throws ResponseException {
+        var authData = authService.verifyAuthToken(request);
+        authService.logoutRequest(authData.authToken());
+        return "{}";
     }
 
     private Object listGames(Request request, Response response) throws ResponseException {
@@ -73,9 +75,9 @@ public class Server {
     }
 
     private Object joinGame(Request request, Response response) throws ResponseException {
-        var username = authService.verifyAuthToken(request);
+        var authData = authService.verifyAuthToken(request);
         var joinRequest = new Gson().fromJson(request.body(), JoinGameRequest.class);
-        gameService.joinGame(joinRequest, username);
+        gameService.joinGame(joinRequest, authData.username());
         return "{}";
     }
 

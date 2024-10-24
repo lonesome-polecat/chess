@@ -58,16 +58,20 @@ public class AuthService {
         gameDAO.clearAllGames();
     }
 
-    public String verifyAuthToken(Request request) throws ResponseException {
+    public AuthData verifyAuthToken(Request request) throws ResponseException {
         if (request.headers().contains("Authorization")) {
             var authToken = request.headers("Authorization");
             var authData = authDAO.getAuth(authToken);
             if (authData == null) {
                 throw new ResponseException(401, "Error: unauthorized");
             }
-            return authData.username();
+            return authData;
         } else {
             throw new ResponseException(401, "Error: unauthorized");
         }
+    }
+
+    public void logoutRequest(String authToken) throws ResponseException {
+        authDAO.deleteAuth(authToken);
     }
 }

@@ -8,6 +8,7 @@ public interface DataAccess {
     abstract class AuthDAO {
         public abstract AuthData createAuth(UserData userData);
         public abstract AuthData getAuth(String authToken);
+        public abstract void deleteAuth(String authToken);
         public abstract void clearAllAuth();
     }
     abstract class UserDAO {
