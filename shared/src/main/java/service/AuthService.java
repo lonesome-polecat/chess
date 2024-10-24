@@ -25,6 +25,9 @@ public class AuthService {
         var existingUser = userDAO.getUser(userData);
 
         if (existingUser == null) {
+            if (userData.username() == null || userData.password() == null) {
+                throw new ResponseException(400, "Error: bad request");
+            }
             userDAO.createUser(userData);
             AuthData authData = authDAO.createAuth(userData);
             return new RegisterResponse(authData);
