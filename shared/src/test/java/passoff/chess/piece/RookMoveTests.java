@@ -1,9 +1,9 @@
-package passoff.chess.chess.piece;
+package passoff.chess.piece;
 
 import chess.ChessPosition;
 import org.junit.jupiter.api.Test;
 
-import static passoff.chess.chess.TestUtilities.validateMoves;
+import static passoff.chess.TestUtilities.validateMoves;
 
 public class RookMoveTests {
 

@@ -1,4 +1,4 @@
-package passoff.chess.chess.piece;
+package passoff.chess.piece;
 
 import chess.ChessMove;
 import chess.ChessPiece;
@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 
-import static passoff.chess.chess.TestUtilities.loadBoard;
-import static passoff.chess.chess.TestUtilities.validateMoves;
+import static passoff.chess.TestUtilities.loadBoard;
+import static passoff.chess.TestUtilities.validateMoves;
 
 public class PawnMoveTests {
 
