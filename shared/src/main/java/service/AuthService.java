@@ -51,8 +51,8 @@ public class AuthService {
         }
     }
 
-    public RegisterResponse logoutRequest(AuthData authData) throws ResponseException {
-        throw new ResponseException(401, "Error: unauthorized");
+    public void logoutRequest(AuthData authData) throws ResponseException {
+        authDAO.deleteAuth(authData.authToken());
     }
 
     public void clearDB() {

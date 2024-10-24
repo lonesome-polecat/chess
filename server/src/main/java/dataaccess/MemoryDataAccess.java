@@ -63,7 +63,7 @@ public class MemoryDataAccess implements DataAccess {
         }
 
         public void updateGame(GameData gameData) {
-            gameMap.put(gameData.gameId(), gameData);
+            gameMap.put(gameData.gameID(), gameData);
         }
 
         public GameData getGame(int gameId) {

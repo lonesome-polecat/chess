@@ -18,9 +18,9 @@ public class GameService {
     }
 
     public NewGameResponse newGameRequest(GameData gameData) throws ResponseException {
-        if (gameData.gameName() != null && gameData.gameName().matches("^[a-zA-Z0-9\\s]*$")) {
+        if (gameData.gameName() != null && !gameData.gameName().isEmpty()) {
             var newGame = gameDAO.createGame(gameData);
-            return new NewGameResponse(newGame.gameId());
+            return new NewGameResponse(newGame.gameID());
         } else {
             throw new ResponseException(400, "Error: bad request");
         }
@@ -45,14 +45,14 @@ public class GameService {
             if (existingGame.whiteUsername() != null) {
                 throw new ResponseException(403, "Error: already taken");
             } else {
-                var modGame = new GameData(existingGame.gameId(), username, existingGame.blackUsername(), existingGame.gameName(), existingGame.game());
+                var modGame = new GameData(existingGame.gameID(), username, existingGame.blackUsername(), existingGame.gameName(), existingGame.game());
                 gameDAO.updateGame(modGame);
             }
         } else if (Objects.equals(request.playerColor(), "BLACK")) {
             if (existingGame.blackUsername() != null) {
                 throw new ResponseException(403, "Error: already taken");
             } else {
-                var modGame = new GameData(existingGame.gameId(), existingGame.whiteUsername(), username, existingGame.gameName(), existingGame.game());
+                var modGame = new GameData(existingGame.gameID(), existingGame.whiteUsername(), username, existingGame.gameName(), existingGame.game());
                 gameDAO.updateGame(modGame);
             }
         } else {
