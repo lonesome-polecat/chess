@@ -1,11 +1,11 @@
-package passoff.chess.chess.extracredit;
+package passoff.chess.extracredit;
 
 import chess.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static passoff.chess.chess.TestUtilities.*;
+import static passoff.chess.TestUtilities.*;
 
 /**
  * Tests if the ChessGame implementation can handle En Passant moves
