@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.MemoryDataAccess;
 import model.GameData;
+import model.RegisterResponse;
 import server.ResponseException;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,6 +1,4 @@
-package service;
-
-import model.AuthData;
+package model;
 
 public class RegisterResponse {
     public final String username;

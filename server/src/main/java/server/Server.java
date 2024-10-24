@@ -1,9 +1,8 @@
 package server;
 
 import dataaccess.MemoryDataAccess;
-import model.GameData;
+import model.*;
 import service.*;
-import model.UserData;
 import spark.*;
 import com.google.gson.Gson;
 

@@ -2,6 +2,7 @@ package service;
 
 import dataaccess.DataAccess;
 import model.AuthData;
+import model.RegisterResponse;
 import model.UserData;
 import server.ResponseException;
 import spark.Request;

@@ -2,6 +2,9 @@ package service;
 
 import dataaccess.DataAccess;
 import model.GameData;
+import model.JoinGameRequest;
+import model.ListGamesResponse;
+import model.NewGameResponse;
 import server.ResponseException;
 
 import java.util.Objects;
