@@ -13,7 +13,7 @@ public class MemoryDataAccess implements DataAccess {
 
         private final HashMap<String, AuthData> authMap = new HashMap<String, AuthData>();
 
-        public AuthData createAuth(UserData userData) {
+        public AuthData createAuth(UserData userData) throws DataAccessException {
             var authToken = UUID.randomUUID().toString();
             var authData = new AuthData(authToken, userData.username());
             authMap.put(authToken, authData);
@@ -36,15 +36,15 @@ public class MemoryDataAccess implements DataAccess {
     public static class UserDAO extends DataAccess.UserDAO {
         private final HashMap<String, UserData> userMap = new HashMap<String, UserData>();
 
-        public UserData getUser(UserData userData) {
+        public UserData getUser(UserData userData) throws DataAccessException {
             return userMap.get(userData.username());
         }
 
-        public void createUser(UserData userData) {
+        public void createUser(UserData userData) throws DataAccessException {
             userMap.put(userData.username(), userData);
         }
 
-        public void clearAllUsers() {
+        public void clearAllUsers() throws DataAccessException {
             userMap.clear();
         }
     }

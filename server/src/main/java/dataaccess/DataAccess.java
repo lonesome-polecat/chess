@@ -6,15 +6,15 @@ import java.util.List;
 
 public interface DataAccess {
     abstract class AuthDAO {
-        public abstract AuthData createAuth(UserData userData);
+        public abstract AuthData createAuth(UserData userData) throws DataAccessException;
         public abstract AuthData getAuth(String authToken);
         public abstract void deleteAuth(String authToken);
         public abstract void clearAllAuth();
     }
     abstract class UserDAO {
-        public abstract UserData getUser(UserData userData);
-        public abstract void createUser(UserData userData);
-        public abstract void clearAllUsers();
+        public abstract UserData getUser(UserData userData) throws DataAccessException;
+        public abstract void createUser(UserData userData) throws DataAccessException;
+        public abstract void clearAllUsers() throws DataAccessException;
     }
     abstract class GameDAO {
         public abstract GameData createGame(GameData gameData);

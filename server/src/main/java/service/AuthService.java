@@ -21,14 +21,28 @@ public class AuthService {
     }
 
     public RegisterResponse registerRequest(UserData userData) throws ResponseException {
-        var existingUser = userDAO.getUser(userData);
+        UserData existingUser = null;
+        try {
+            existingUser = userDAO.getUser(userData);
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
 
         if (existingUser == null) {
             if (userData.username() == null || userData.password() == null) {
                 throw new ResponseException(400, "Error: bad request");
             }
-            userDAO.createUser(userData);
-            AuthData authData = authDAO.createAuth(userData);
+            try {
+                userDAO.createUser(userData);
+            } catch (dataaccess.DataAccessException e) {
+                throw new RuntimeException(e);
+            }
+            AuthData authData = null;
+            try {
+                authData = authDAO.createAuth(userData);
+            } catch (dataaccess.DataAccessException e) {
+                throw new RuntimeException(e);
+            }
             return new RegisterResponse(authData);
         } else {
             throw new ResponseException(403, "Error: already taken");
@@ -36,14 +50,24 @@ public class AuthService {
     }
 
     public RegisterResponse loginRequest(UserData userData) throws ResponseException {
-        var existingUser = userDAO.getUser(userData);
+        UserData existingUser = null;
+        try {
+            existingUser = userDAO.getUser(userData);
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
 
         if (existingUser == null) {
             throw new ResponseException(401, "Error: unauthorized");
         }
 
         if (Objects.equals(existingUser.password(), userData.password())) {
-            AuthData authData = authDAO.createAuth(userData);
+            AuthData authData = null;
+            try {
+                authData = authDAO.createAuth(userData);
+            } catch (dataaccess.DataAccessException e) {
+                throw new RuntimeException(e);
+            }
             return new RegisterResponse(authData);
         } else {
             throw new ResponseException(401, "Error: unauthorized");
@@ -52,7 +76,11 @@ public class AuthService {
 
     public void clearDB() {
         authDAO.clearAllAuth();
-        userDAO.clearAllUsers();
+        try {
+            userDAO.clearAllUsers();
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         gameDAO.clearAllGames();
     }
 
