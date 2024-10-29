@@ -12,9 +12,9 @@ import server.ResponseException;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AuthServiceSqlTest {
-    private final MySqlDataAccess.AuthDAO authDAO = new MemoryDataAccess.AuthDAO();
-    private final MySqlDataAccess.UserDAO userDAO = new MemoryDataAccess.UserDAO();
-    private final MySqlDataAccess.GameDAO gameDAO = new MemoryDataAccess.GameDAO();
+    private final MySqlDataAccess.AuthDAO authDAO = new MySqlDataAccess.AuthDAO();
+    private final MySqlDataAccess.UserDAO userDAO = new MySqlDataAccess.UserDAO();
+    private final MySqlDataAccess.GameDAO gameDAO = new MySqlDataAccess.GameDAO();
 
     private AuthService authService;
     private GameService gameService;

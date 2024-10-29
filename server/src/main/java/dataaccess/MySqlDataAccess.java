@@ -1,18 +1,19 @@
 package dataaccess;
 
+import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import server.ResponseException;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
 public class MySqlDataAccess implements DataAccess {
-    Connection database;
 
-    public MySqlDataAccess() {
+    public MySqlDataAccess() throws ResponseException {
         this.configureDatabase();
     }
 
@@ -20,9 +21,11 @@ public class MySqlDataAccess implements DataAccess {
     public static class AuthDAO extends DataAccess.AuthDAO {
 
         public AuthData createAuth(UserData userData) {
+            return new AuthData("", "");
         }
 
         public AuthData getAuth(String authToken) {
+            return new AuthData("", "");
         }
 
         public void deleteAuth(String authToken) {
@@ -77,6 +80,24 @@ public class MySqlDataAccess implements DataAccess {
 
         public void clearAllGames() {
         }
+    }
+
+    private AuthData readAuth(ResultSet rs) throws SQLException {
+        var authToken = rs.getString("authToken");
+        var username = rs.getString("username");
+        return new AuthData(authToken, username);
+    }
+
+    private UserData readUser(ResultSet rs) throws SQLException {
+        var username = rs.getString("username");
+        var password = rs.getString("password");
+        var email = rs.getString("email");
+        return new UserData(username, password, email);
+    }
+
+    private GameData readGame(ResultSet rs) throws SQLException {
+        var json = rs.getString("json");
+        return new Gson().fromJson(json, GameData.class);
     }
 
     private final String[] createStatements = {
