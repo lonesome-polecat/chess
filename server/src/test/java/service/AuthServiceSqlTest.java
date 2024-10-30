@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
 import model.GameData;
@@ -21,6 +22,12 @@ public class AuthServiceSqlTest {
 
     @BeforeEach
     public void setUp() {
+        try {
+            new MySqlDataAccess();
+        } catch (DataAccessException e) {
+            System.out.println(e);
+            System.exit(1);
+        }
         // Initialize the real AuthService
         authService = new AuthService(authDAO, userDAO, gameDAO);
         gameService = new GameService(gameDAO);

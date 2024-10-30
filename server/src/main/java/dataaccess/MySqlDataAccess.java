@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class MySqlDataAccess implements DataAccess {
 
-    public MySqlDataAccess() throws ResponseException {
+    public MySqlDataAccess() throws DataAccessException {
         this.configureDatabase();
     }
 
@@ -26,7 +26,7 @@ public class MySqlDataAccess implements DataAccess {
                 try (var ps = conn.prepareStatement(statement)) {
                     ps.setString(1, userData.username());
                     ps.setString(2, authToken);
-                    ps.executeQuery();
+                    ps.executeUpdate();
                 }
             } catch (Exception e) {
                 throw new DataAccessException("Error: cannot create auth");
@@ -43,7 +43,20 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public void clearAllAuth() throws DataAccessException {
-            throw new DataAccessException("Not implemented");
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = "DELETE from auth";
+                try (var ps = conn.prepareStatement(statement)) {
+                    ps.executeUpdate();
+                }
+            } catch (Exception e) {
+                throw new DataAccessException("Error: cannot clear auth table");
+            }
+        }
+
+        private AuthData readAuth(ResultSet rs) throws SQLException {
+            var authToken = rs.getString("authToken");
+            var username = rs.getString("username");
+            return new AuthData(authToken, username);
         }
     }
 
@@ -73,7 +86,7 @@ public class MySqlDataAccess implements DataAccess {
                     ps.setString(1, userData.username());
                     ps.setString(2, userData.password());
                     ps.setString(3, userData.email());
-                    ps.executeQuery();
+                    ps.executeUpdate();
                 }
             } catch (Exception e) {
                 throw new DataAccessException("Error: cannot create user");
@@ -81,7 +94,14 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public void clearAllUsers() throws DataAccessException {
-            throw new DataAccessException("Not implemented");
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = "DELETE from user";
+                try (var ps = conn.prepareStatement(statement)) {
+                    ps.executeUpdate();
+                }
+            } catch (Exception e) {
+                throw new DataAccessException("Error: cannot clear user table");
+            }
         }
 
         private UserData readUser(ResultSet rs) throws SQLException {
@@ -91,7 +111,6 @@ public class MySqlDataAccess implements DataAccess {
             return new UserData(username, password, email);
         }
     }
-
 
     public static class GameDAO extends DataAccess.GameDAO {
 
@@ -112,15 +131,17 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public void clearAllGames() throws DataAccessException {
-            throw new DataAccessException("Not implemented");
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = "DELETE from game";
+                try (var ps = conn.prepareStatement(statement)) {
+                    ps.executeUpdate();
+                }
+            } catch (Exception e) {
+                throw new DataAccessException("Error: cannot clear game table");
+            }
         }
     }
 
-    private AuthData readAuth(ResultSet rs) throws SQLException {
-        var authToken = rs.getString("authToken");
-        var username = rs.getString("username");
-        return new AuthData(authToken, username);
-    }
 
 
     private GameData readGame(ResultSet rs) throws SQLException {
@@ -158,11 +179,11 @@ public class MySqlDataAccess implements DataAccess {
             """
     };
 
-    private void configureDatabase() throws ResponseException {
+    private void configureDatabase() throws DataAccessException {
         try {
             DatabaseManager.createDatabase();
         } catch (DataAccessException ex) {
-            throw new ResponseException(500, String.format("Unable to create database: %s", ex.getMessage()));
+            throw new DataAccessException(String.format("Unable to create database: %s", ex.getMessage()));
         }
         try (var conn = DatabaseManager.getConnection()) {
             for (var statement : createStatements) {
@@ -171,9 +192,9 @@ public class MySqlDataAccess implements DataAccess {
                 }
             }
         } catch (DataAccessException ex) {
-            throw new ResponseException(500, String.format("Unable to connect to database: %s", ex.getMessage()));
+            throw new DataAccessException(String.format("Unable to connect to database: %s", ex.getMessage()));
         } catch (SQLException ex) {
-            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new DataAccessException(String.format("Unable to query database: %s", ex.getMessage()));
         }
     }
 }
