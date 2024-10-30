@@ -35,11 +35,32 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public AuthData getAuth(String authToken) throws DataAccessException {
-            throw new DataAccessException("Not implemented");
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = "SELECT username, authToken FROM auth WHERE auth=?";
+                try (var ps = conn.prepareStatement(statement)) {
+                    ps.setString(1, authToken);
+                    try (var rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            return readAuth(rs);
+                        } else {
+                            return null;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                throw new DataAccessException("Error: cannot get user");
+            }
         }
 
         public void deleteAuth(String authToken) throws DataAccessException {
-            throw new DataAccessException("Not implemented");
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = "DELETE from auth where authToken=?";
+                try (var ps = conn.prepareStatement(statement)) {
+                    ps.executeUpdate(authToken);
+                }
+            } catch (Exception e) {
+                throw new DataAccessException("Error: cannot delete from auth table");
+            }
         }
 
         public void clearAllAuth() throws DataAccessException {
