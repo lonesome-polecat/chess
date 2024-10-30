@@ -34,14 +34,16 @@ public class MySqlDataAccess implements DataAccess {
             return new AuthData(authToken, userData.username());
         }
 
-        public AuthData getAuth(String authToken) {
-            return new AuthData("", "");
+        public AuthData getAuth(String authToken) throws DataAccessException {
+            throw new DataAccessException("Not implemented");
         }
 
-        public void deleteAuth(String authToken) {
+        public void deleteAuth(String authToken) throws DataAccessException {
+            throw new DataAccessException("Not implemented");
         }
 
-        public void clearAllAuth() {
+        public void clearAllAuth() throws DataAccessException {
+            throw new DataAccessException("Not implemented");
         }
     }
 
@@ -79,7 +81,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public void clearAllUsers() throws DataAccessException {
-
+            throw new DataAccessException("Not implemented");
         }
 
         private UserData readUser(ResultSet rs) throws SQLException {
@@ -93,19 +95,24 @@ public class MySqlDataAccess implements DataAccess {
 
     public static class GameDAO extends DataAccess.GameDAO {
 
-        public GameData createGame(GameData gameData) {
+        public GameData createGame(GameData gameData) throws DataAccessException {
+            throw new DataAccessException("Not implemented");
         }
 
-        public void updateGame(GameData gameData) {
+        public void updateGame(GameData gameData) throws DataAccessException {
+            throw new DataAccessException("Not implemented");
         }
 
-        public GameData getGame(int gameId) {
+        public GameData getGame(int gameId) throws DataAccessException {
+            throw new DataAccessException("Not implemented");
         }
 
-        public List<GameData> getGames() {
+        public List<GameData> getGames() throws DataAccessException {
+            throw new DataAccessException("Not implemented");
         }
 
-        public void clearAllGames() {
+        public void clearAllGames() throws DataAccessException {
+            throw new DataAccessException("Not implemented");
         }
     }
 

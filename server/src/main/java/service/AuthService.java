@@ -75,19 +75,32 @@ public class AuthService {
     }
 
     public void clearDB() {
-        authDAO.clearAllAuth();
+        try {
+            authDAO.clearAllAuth();
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         try {
             userDAO.clearAllUsers();
         } catch (dataaccess.DataAccessException e) {
             throw new RuntimeException(e);
         }
-        gameDAO.clearAllGames();
+        try {
+            gameDAO.clearAllGames();
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public AuthData verifyAuthToken(Request request) throws ResponseException {
         if (request.headers().contains("Authorization")) {
             var authToken = request.headers("Authorization");
-            var authData = authDAO.getAuth(authToken);
+            AuthData authData = null;
+            try {
+                authData = authDAO.getAuth(authToken);
+            } catch (dataaccess.DataAccessException e) {
+                throw new RuntimeException(e);
+            }
             if (authData == null) {
                 throw new ResponseException(401, "Error: unauthorized");
             }
@@ -98,6 +111,10 @@ public class AuthService {
     }
 
     public void logoutRequest(String authToken) {
-        authDAO.deleteAuth(authToken);
+        try {
+            authDAO.deleteAuth(authToken);
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

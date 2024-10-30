@@ -53,7 +53,11 @@ public class GameServiceSqlTest {
     public void testListGamesRequest_Success() {
         // Arrange
         GameData gameData = new GameData(0, null, null, "ChessGame", null);
-        gameDAO.createGame(gameData);
+        try {
+            gameDAO.createGame(gameData);
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
 
         // Act
         ListGamesResponse response = gameService.listGamesRequest();
@@ -77,14 +81,23 @@ public class GameServiceSqlTest {
     public void testJoinGame_Success() throws ResponseException {
         // Arrange
         GameData gameData = new GameData(0, null, null, "ChessGame", null);
-        gameDAO.createGame(gameData);
+        try {
+            gameDAO.createGame(gameData);
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         JoinGameRequest joinRequest = new JoinGameRequest("1", "WHITE");
 
         // Act
         gameService.joinGame(joinRequest, "player1");
 
         // Assert
-        GameData updatedGame = gameDAO.getGame(1);
+        GameData updatedGame = null;
+        try {
+            updatedGame = gameDAO.getGame(1);
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         assertEquals("player1", updatedGame.whiteUsername());
     }
 
