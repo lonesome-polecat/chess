@@ -9,6 +9,7 @@ import server.ResponseException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -150,12 +151,22 @@ public class MySqlDataAccess implements DataAccess {
                     return new GameData(id, null, null, gameData.gameName(), game);
                 }
             } catch (Exception e) {
-                throw new DataAccessException("Error: cannot create user");
+                throw new DataAccessException("Error: cannot create game");
             }
         }
 
         public void updateGame(GameData gameData) throws DataAccessException {
-            throw new DataAccessException("Not implemented");
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = "UPDATE game SET whiteUsername=?, blackUsername=? WHERE gameID=?";
+                try (var ps = conn.prepareStatement(statement)) {
+                    ps.setString(1, gameData.whiteUsername());
+                    ps.setString(2, gameData.blackUsername());
+                    ps.setInt(3, gameData.gameID());
+                    ps.executeUpdate();
+                }
+            } catch (Exception e) {
+                throw new DataAccessException("Error: cannot get game");
+            }
         }
 
         public GameData getGame(int gameId) throws DataAccessException {
@@ -176,7 +187,20 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public List<GameData> getGames() throws DataAccessException {
-            throw new DataAccessException("Not implemented");
+            var gamesList = new LinkedList<GameData>();
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = "SELECT * FROM game";
+                try (var ps = conn.prepareStatement(statement)) {
+                    try (var rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            gamesList.add(readGame(rs));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                throw new DataAccessException("Error: cannot get game");
+            }
+            return gamesList;
         }
 
         public void clearAllGames() throws DataAccessException {
