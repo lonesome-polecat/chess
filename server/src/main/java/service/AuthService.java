@@ -8,8 +8,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import server.ResponseException;
 import spark.Request;
 
-import java.util.Objects;
-
 public class AuthService {
     private final DataAccess.AuthDAO authDAO;
     private final DataAccess.UserDAO userDAO;
