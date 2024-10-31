@@ -69,7 +69,7 @@ public class MySqlDataAccess implements DataAccess {
 
         public void clearAllAuth() throws DataAccessException {
             try (var conn = DatabaseManager.getConnection()) {
-                var statement = "DELETE from auth";
+                var statement = "TRUNCATE auth";
                 try (var ps = conn.prepareStatement(statement)) {
                     ps.executeUpdate();
                 }
@@ -120,7 +120,7 @@ public class MySqlDataAccess implements DataAccess {
 
         public void clearAllUsers() throws DataAccessException {
             try (var conn = DatabaseManager.getConnection()) {
-                var statement = "DELETE from user";
+                var statement = "TRUNCATE user";
                 try (var ps = conn.prepareStatement(statement)) {
                     ps.executeUpdate();
                 }
@@ -205,7 +205,7 @@ public class MySqlDataAccess implements DataAccess {
 
         public void clearAllGames() throws DataAccessException {
             try (var conn = DatabaseManager.getConnection()) {
-                var statement = "DELETE from game";
+                var statement = "TRUNCATE game";
                 try (var ps = conn.prepareStatement(statement)) {
                     ps.executeUpdate();
                 }
