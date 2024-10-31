@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -10,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
+
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class MySqlDataAccess implements DataAccess {
 
@@ -136,7 +139,19 @@ public class MySqlDataAccess implements DataAccess {
     public static class GameDAO extends DataAccess.GameDAO {
 
         public GameData createGame(GameData gameData) throws DataAccessException {
-            throw new DataAccessException("Not implemented");
+            var game = new ChessGame();
+            var gameString = new Gson().toJson(game);
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, gameString) VALUES (null, null, ?, ?)";
+                try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                    ps.setString(1, (gameData.gameName()));
+                    ps.setString(2, (gameString));
+                    var id = ps.executeUpdate();
+                    return new GameData(id, null, null, gameData.gameName(), game);
+                }
+            } catch (Exception e) {
+                throw new DataAccessException("Error: cannot create user");
+            }
         }
 
         public void updateGame(GameData gameData) throws DataAccessException {
@@ -144,7 +159,20 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public GameData getGame(int gameId) throws DataAccessException {
-            throw new DataAccessException("Not implemented");
+            try (var conn = DatabaseManager.getConnection()) {
+                var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, gameString FROM game WHERE gameID=?";
+                try (var ps = conn.prepareStatement(statement)) {
+                    ps.setInt(1, gameId);
+                    try (var rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            return readGame(rs);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                throw new DataAccessException("Error: cannot get game");
+            }
+            return null;
         }
 
         public List<GameData> getGames() throws DataAccessException {
@@ -161,13 +189,16 @@ public class MySqlDataAccess implements DataAccess {
                 throw new DataAccessException("Error: cannot clear game table");
             }
         }
-    }
 
-
-
-    private GameData readGame(ResultSet rs) throws SQLException {
-        var json = rs.getString("json");
-        return new Gson().fromJson(json, GameData.class);
+        private GameData readGame(ResultSet rs) throws SQLException {
+            var gameID = rs.getInt("gameID");
+            var whiteUsername = rs.getString("whiteUsername");
+            var blackUsername = rs.getString("blackUsername");
+            var gameName = rs.getString("gameName");
+            var gameString = rs.getString("gameString");
+            var game = new Gson().fromJson(gameString, ChessGame.class);
+            return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+        }
     }
 
     private final String[] createStatements = {
@@ -193,7 +224,10 @@ public class MySqlDataAccess implements DataAccess {
             """
             CREATE TABLE IF NOT EXISTS game (
               `gameID` int NOT NULL AUTO_INCREMENT,
-              `json` TEXT DEFAULT NULL,
+              `whiteUsername` varchar(256) DEFAULT NULL,
+              `blackUsername` varchar(256) DEFAULT NULL,
+              `gameName` varchar(256) DEFAULT NULL,
+              `gameString` TEXT DEFAULT NULL,
               PRIMARY KEY (`gameID`),
               INDEX(gameID)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

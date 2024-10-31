@@ -1,6 +1,8 @@
 package service;
 
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import model.GameData;
 import model.JoinGameRequest;
 import model.ListGamesResponse;
@@ -18,6 +20,12 @@ public class GameServiceSqlTest {
 
     @BeforeEach
     public void setUp() {
+        try {
+            new MySqlDataAccess();
+        } catch (DataAccessException e) {
+            System.out.println(e);
+            System.exit(1);
+        }
         gameDAO = new MemoryDataAccess.GameDAO();
         gameService = new GameService(gameDAO);  // Assuming authDAO and userDAO are not used in this test
     }
