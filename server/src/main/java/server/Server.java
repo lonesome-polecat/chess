@@ -1,6 +1,7 @@
 package server;
 
 import dataaccess.MemoryDataAccess;
+import dataaccess.MySqlDataAccess;
 import model.*;
 import service.*;
 import spark.*;
@@ -8,9 +9,13 @@ import com.google.gson.Gson;
 
 public class Server {
 
-    private final MemoryDataAccess.AuthDAO authDAO = new MemoryDataAccess.AuthDAO();
-    private final MemoryDataAccess.UserDAO userDAO = new MemoryDataAccess.UserDAO();
-    private final MemoryDataAccess.GameDAO gameDAO = new MemoryDataAccess.GameDAO();
+//    private final MemoryDataAccess.AuthDAO authDAO = new MemoryDataAccess.AuthDAO();
+//    private final MemoryDataAccess.UserDAO userDAO = new MemoryDataAccess.UserDAO();
+//    private final MemoryDataAccess.GameDAO gameDAO = new MemoryDataAccess.GameDAO();
+
+    private final MySqlDataAccess.AuthDAO authDAO = new MySqlDataAccess.AuthDAO();
+    private final MySqlDataAccess.UserDAO userDAO = new MySqlDataAccess.UserDAO();
+    private final MySqlDataAccess.GameDAO gameDAO = new MySqlDataAccess.GameDAO();
 
     private final AuthService authService = new AuthService(authDAO, userDAO, gameDAO);
     private final GameService gameService = new GameService(gameDAO);

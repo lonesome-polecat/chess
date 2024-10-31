@@ -40,7 +40,7 @@ public class MySqlDataAccess implements DataAccess {
 
         public AuthData getAuth(String authToken) throws DataAccessException {
             try (var conn = DatabaseManager.getConnection()) {
-                var statement = "SELECT username, authToken FROM auth WHERE auth=?";
+                var statement = "SELECT username, authToken FROM auth WHERE authToken=?";
                 try (var ps = conn.prepareStatement(statement)) {
                     ps.setString(1, authToken);
                     try (var rs = ps.executeQuery()) {
@@ -52,7 +52,7 @@ public class MySqlDataAccess implements DataAccess {
                     }
                 }
             } catch (Exception e) {
-                throw new DataAccessException("Error: cannot get user");
+                throw new DataAccessException("Error: cannot get auth");
             }
         }
 

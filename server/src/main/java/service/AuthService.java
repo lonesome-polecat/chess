@@ -4,6 +4,7 @@ import dataaccess.DataAccess;
 import model.AuthData;
 import model.RegisterResponse;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import server.ResponseException;
 import spark.Request;
 
@@ -33,7 +34,8 @@ public class AuthService {
                 throw new ResponseException(400, "Error: bad request");
             }
             try {
-                userDAO.createUser(userData);
+                String hashedPassword = BCrypt.hashpw(userData.password(), BCrypt.gensalt());
+                userDAO.createUser(new UserData(userData.username(), hashedPassword, userData.email()));
             } catch (dataaccess.DataAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -61,7 +63,8 @@ public class AuthService {
             throw new ResponseException(401, "Error: unauthorized");
         }
 
-        if (Objects.equals(existingUser.password(), userData.password())) {
+        String storedPassword = existingUser.password();
+        if (BCrypt.checkpw(userData.password(), storedPassword)) {
             AuthData authData = null;
             try {
                 authData = authDAO.createAuth(userData);
