@@ -23,6 +23,7 @@ public class MySqlDataAccess implements DataAccess {
     public static class AuthDAO extends DataAccess.AuthDAO {
 
         public AuthData createAuth(UserData userData) throws DataAccessException {
+            // Insert an AuthData object into auth table and return authToken
             var authToken = UUID.randomUUID().toString();
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "INSERT INTO auth (username, authToken) VALUES (?, ?)";
@@ -38,6 +39,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public AuthData getAuth(String authToken) throws DataAccessException {
+            // Return matching authToken from database else return null
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "SELECT username, authToken FROM auth WHERE authToken=?";
                 try (var ps = conn.prepareStatement(statement)) {
@@ -56,6 +58,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public void deleteAuth(String authToken) throws DataAccessException {
+            // delete matching authToken in auth table for logging out user
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "DELETE from auth where authToken=?";
                 try (var ps = conn.prepareStatement(statement)) {
@@ -67,6 +70,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public void clearAllAuth() throws DataAccessException {
+            // Clear auth table in database
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "TRUNCATE auth";
                 try (var ps = conn.prepareStatement(statement)) {
@@ -78,6 +82,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         private AuthData readAuth(ResultSet rs) throws SQLException {
+            // Convert auth table ResultSet into AuthData object
             var authToken = rs.getString("authToken");
             var username = rs.getString("username");
             return new AuthData(authToken, username);
@@ -87,6 +92,7 @@ public class MySqlDataAccess implements DataAccess {
     public static class UserDAO extends DataAccess.UserDAO {
 
         public UserData getUser(UserData userData) throws DataAccessException {
+            // Find user data in database by username and return UserData object
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "SELECT username, password, email FROM user WHERE username=?";
                 try (var ps = conn.prepareStatement(statement)) {
@@ -104,6 +110,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public void createUser(UserData userData) throws DataAccessException {
+            // Insert a UserData object into user table
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
                 try (var ps = conn.prepareStatement(statement)) {
@@ -118,6 +125,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public void clearAllUsers() throws DataAccessException {
+            // Clear user table in database
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "TRUNCATE user";
                 try (var ps = conn.prepareStatement(statement)) {
@@ -129,6 +137,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         private UserData readUser(ResultSet rs) throws SQLException {
+            // Convert user table ResultSet into UserData object
             var username = rs.getString("username");
             var password = rs.getString("password");
             var email = rs.getString("email");
@@ -139,6 +148,7 @@ public class MySqlDataAccess implements DataAccess {
     public static class GameDAO extends DataAccess.GameDAO {
 
         public GameData createGame(GameData gameData) throws DataAccessException {
+            // Insert GameData object into game table
             var game = new ChessGame();
             var gameString = new Gson().toJson(game);
             try (var conn = DatabaseManager.getConnection()) {
@@ -155,6 +165,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public void updateGame(GameData gameData) throws DataAccessException {
+            // Modify existing game with new player information in game table in database
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "UPDATE game SET whiteUsername=?, blackUsername=? WHERE gameID=?";
                 try (var ps = conn.prepareStatement(statement)) {
@@ -169,6 +180,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public GameData getGame(int gameId) throws DataAccessException {
+            // Find game in database with matcing gameID and return GameData object
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, gameString FROM game WHERE gameID=?";
                 try (var ps = conn.prepareStatement(statement)) {
@@ -186,6 +198,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public List<GameData> getGames() throws DataAccessException {
+            // Find and return all games in game table in database
             var gamesList = new LinkedList<GameData>();
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "SELECT * FROM game";
@@ -203,6 +216,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         public void clearAllGames() throws DataAccessException {
+            // Clear game table in database
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "TRUNCATE game";
                 try (var ps = conn.prepareStatement(statement)) {
@@ -214,6 +228,7 @@ public class MySqlDataAccess implements DataAccess {
         }
 
         private GameData readGame(ResultSet rs) throws SQLException {
+            // Convert game ResultSet into GameData object
             var gameID = rs.getInt("gameID");
             var whiteUsername = rs.getString("whiteUsername");
             var blackUsername = rs.getString("blackUsername");
@@ -258,6 +273,7 @@ public class MySqlDataAccess implements DataAccess {
     };
 
     private void configureDatabase() throws DataAccessException {
+        // Create database and user, auth, and game tables if they do not already exist
         try {
             DatabaseManager.createDatabase();
         } catch (DataAccessException ex) {
