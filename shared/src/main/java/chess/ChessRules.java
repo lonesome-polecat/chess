@@ -24,8 +24,8 @@ public class ChessRules {
 
     public ArrayList<ChessMove> getTeamMoves(ChessBoard board, ChessGame.TeamColor color) {
         var teamMoves = new ArrayList<ChessMove>();
-        for (int i = 1; i <= board.BOARD_SIZE; i++) {
-            for (int j = 1; j <= board.BOARD_SIZE; j++) {
+        for (int i = 1; i <= board.boardSize; i++) {
+            for (int j = 1; j <= board.boardSize; j++) {
                 var position = new ChessPosition(i, j);
                 var piece = board.getPiece(position);
                 if (piece != null) {
@@ -527,8 +527,8 @@ public class ChessRules {
     private void updateTeamAttackVectors(ChessGame.TeamColor teamColor, ChessBoard board) {
         // Clear attackVectors and reset
         teamAttackVectors.get(teamColor).clear();
-        for (int i = 1; i <= board.BOARD_SIZE; i++) {
-            for (int j = 1; j <= board.BOARD_SIZE; j++) {
+        for (int i = 1; i <= board.boardSize; i++) {
+            for (int j = 1; j <= board.boardSize; j++) {
                 var position = new ChessPosition(i, j);
                 var piece = board.getPiece(position);
                 if (piece != null) {

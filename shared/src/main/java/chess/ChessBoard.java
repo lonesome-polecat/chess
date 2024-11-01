@@ -10,17 +10,17 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    public static int BOARD_SIZE = 8;
-    private ChessPiece[][] squares = new ChessPiece[BOARD_SIZE][BOARD_SIZE];
+    public int boardSize = 8;
+    private ChessPiece[][] squares = new ChessPiece[boardSize][boardSize];
 
     public ChessBoard() {
         
     }
 
     public ChessBoard(ChessBoard board) {
-        for (int i = 1; i <= board.BOARD_SIZE; i++) {
-           var row = new ChessPiece[board.BOARD_SIZE];
-           for (int j = 1; j <= board.BOARD_SIZE; j++) {
+        for (int i = 1; i <= board.boardSize; i++) {
+           var row = new ChessPiece[board.boardSize];
+           for (int j = 1; j <= board.boardSize; j++) {
                var pos = new ChessPosition(i, j);
                var val = board.getPiece(pos);
                if (val != null) {
@@ -93,8 +93,8 @@ public class ChessBoard {
 
     public ChessPosition getSpecificPiecePosition(ChessPiece.PieceType type, ChessGame.TeamColor teamColor) {
         ChessPosition piecePosition = null;
-        for (int i = 1; i <= BOARD_SIZE; i++) {
-            for (int j = 1; j <= BOARD_SIZE; j++) {
+        for (int i = 1; i <= boardSize; i++) {
+            for (int j = 1; j <= boardSize; j++) {
                 var position = new ChessPosition(i, j);
                 var piece = getPiece(position);
                 if (piece != null) {
