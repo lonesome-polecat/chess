@@ -1,6 +1,5 @@
 package chess;
 
-import javax.management.RuntimeErrorException;
 import java.util.Objects;
 
 /**
@@ -46,14 +45,13 @@ public class ChessPosition {
     public String toString() {
         String strRow = Integer.toString(row);
         String strCol = Integer.toString(col);
-        String strPos = String.format("[%s][%s]", strRow, strCol);
-        return strPos;
+        return String.format("[%s][%s]", strRow, strCol);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
         ChessPosition that = (ChessPosition) o;
         return row == that.row && col == that.col;
     }
