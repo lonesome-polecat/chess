@@ -16,6 +16,14 @@ public class Server {
     private final GameService gameService = new GameService(gameDAO);
 
     public int run(int desiredPort) {
+        // Initialize database
+        try {
+            new MySqlDataAccess();
+        } catch (Exception e) {
+            System.out.printf("Cannot initialize databases: %s%n", e);
+            System.exit(1);
+        }
+
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
