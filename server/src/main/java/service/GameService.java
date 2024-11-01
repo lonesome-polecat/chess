@@ -46,21 +46,21 @@ public class GameService {
             throw new ResponseException(400, "Error: bad request");
         }
 
-        GameData existingGame = null;
+        GameData currGame = null;
         try {
-            existingGame = gameDAO.getGame(Integer.parseInt(request.gameID()));
+            currGame = gameDAO.getGame(Integer.parseInt(request.gameID()));
         } catch (dataaccess.DataAccessException e) {
             throw new RuntimeException(e);
         }
-        if (existingGame == null) {
+        if (currGame == null) {
             throw new ResponseException(400, "Error: bad request");
         }
 
         if (Objects.equals(request.playerColor(), "WHITE")) {
-            if (existingGame.whiteUsername() != null) {
+            if (currGame.whiteUsername() != null) {
                 throw new ResponseException(403, "Error: already taken");
             } else {
-                var modGame = new GameData(existingGame.gameID(), username, existingGame.blackUsername(), existingGame.gameName(), existingGame.game());
+                var modGame = new GameData(currGame.gameID(), username, currGame.blackUsername(), currGame.gameName(), currGame.game());
                 try {
                     gameDAO.updateGame(modGame);
                 } catch (dataaccess.DataAccessException e) {
@@ -68,10 +68,10 @@ public class GameService {
                 }
             }
         } else if (Objects.equals(request.playerColor(), "BLACK")) {
-            if (existingGame.blackUsername() != null) {
+            if (currGame.blackUsername() != null) {
                 throw new ResponseException(403, "Error: already taken");
             } else {
-                var modGame = new GameData(existingGame.gameID(), existingGame.whiteUsername(), username, existingGame.gameName(), existingGame.game());
+                var modGame = new GameData(currGame.gameID(), currGame.whiteUsername(), username, currGame.gameName(), currGame.game());
                 try {
                     gameDAO.updateGame(modGame);
                 } catch (dataaccess.DataAccessException e) {
