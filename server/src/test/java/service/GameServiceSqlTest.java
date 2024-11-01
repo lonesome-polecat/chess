@@ -15,8 +15,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class GameServiceSqlTest {
 
+    private final MySqlDataAccess.AuthDAO authDAO = new MySqlDataAccess.AuthDAO();
+    private final MySqlDataAccess.UserDAO userDAO = new MySqlDataAccess.UserDAO();
+    private final MySqlDataAccess.GameDAO gameDAO = new MySqlDataAccess.GameDAO();
+
+    private AuthService authService;
     private GameService gameService;
-    private MemoryDataAccess.GameDAO gameDAO;
 
     @BeforeEach
     public void setUp() {
@@ -26,8 +30,10 @@ public class GameServiceSqlTest {
             System.out.println(e);
             System.exit(1);
         }
-        gameDAO = new MemoryDataAccess.GameDAO();
         gameService = new GameService(gameDAO);  // Assuming authDAO and userDAO are not used in this test
+        authService = new AuthService(authDAO, userDAO, gameDAO);  // Assuming authDAO and userDAO are not used in this test
+
+        authService.clearDB();
     }
 
     @Test
