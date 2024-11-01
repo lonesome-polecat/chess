@@ -8,6 +8,10 @@ import com.google.gson.Gson;
 
 public class Server {
 
+//    private final MemoryDataAccess.AuthDAO authDAO = new MemoryDataAccess.AuthDAO();
+//    private final MemoryDataAccess.UserDAO userDAO = new MemoryDataAccess.UserDAO();
+//    private final MemoryDataAccess.GameDAO gameDAO = new MemoryDataAccess.GameDAO();
+
     private final MySqlDataAccess.AuthDAO authDAO = new MySqlDataAccess.AuthDAO();
     private final MySqlDataAccess.UserDAO userDAO = new MySqlDataAccess.UserDAO();
     private final MySqlDataAccess.GameDAO gameDAO = new MySqlDataAccess.GameDAO();
