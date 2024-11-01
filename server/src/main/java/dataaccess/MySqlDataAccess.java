@@ -182,7 +182,10 @@ public class MySqlDataAccess implements DataAccess {
                     ps.setString(1, gameData.whiteUsername());
                     ps.setString(2, gameData.blackUsername());
                     ps.setInt(3, gameData.gameID());
-                    ps.executeUpdate();
+                    var rowsAffected = ps.executeUpdate();
+                    if (rowsAffected < 1) {
+                        throw new DataAccessException("Error: cannot update name");
+                    }
                 }
             } catch (Exception e) {
                 throw new DataAccessException("Error: cannot get game");

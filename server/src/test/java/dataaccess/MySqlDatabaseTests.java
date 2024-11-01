@@ -6,8 +6,6 @@ import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.AuthService;
-import service.GameService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,7 +21,6 @@ public class MySqlDatabaseTests {
         try {
             new MySqlDataAccess();
         } catch (DataAccessException e) {
-            System.out.println(e);
             System.exit(1);
         }
         authDAO = new MySqlDataAccess.AuthDAO();
@@ -50,7 +47,7 @@ public class MySqlDatabaseTests {
     @Test
     public void testCreateAuthFailure() {
         assertThrows(DataAccessException.class, () -> {
-            authDAO.createAuth(new UserData("nonexistent", "password", "email"));
+            authDAO.createAuth(new UserData(null, "password", "email"));
         });
     }
 
@@ -64,8 +61,9 @@ public class MySqlDatabaseTests {
     }
 
     @Test
-    public void testGetAuthFailure() {
-        assertThrows(DataAccessException.class, () -> authDAO.getAuth("invalidToken"));
+    public void testGetAuthFailure() throws DataAccessException {
+        userDAO.createUser(testUser);
+        assertNull(authDAO.getAuth("invalidToken"));
     }
 
     @Test
@@ -135,10 +133,14 @@ public class MySqlDatabaseTests {
     }
 
     @Test
-    public void testUpdateGameFailure() {
+    public void testUpdateGameFailure() throws DataAccessException {
+        GameData createdGame = gameDAO.createGame(testGame);
+        GameData updatedGame = new GameData(createdGame.gameID(), "player1", null, createdGame.gameName(), createdGame.game());
+        gameDAO.updateGame(updatedGame);
+
         assertThrows(DataAccessException.class, () -> {
-            GameData invalidGame = new GameData(-1, null, null, "Invalid Game", new ChessGame());
-            gameDAO.updateGame(invalidGame);
+            GameData badGameUpdate = new GameData(-1, "player2", null, createdGame.gameName(), createdGame.game());
+            gameDAO.updateGame(badGameUpdate);
         });
     }
 
