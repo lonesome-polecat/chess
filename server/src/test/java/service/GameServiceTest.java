@@ -23,7 +23,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void testNewGameRequest_Success() throws ResponseException {
+    public void testNewGameRequestSuccess() throws ResponseException {
         // Arrange
         GameData gameData = new GameData(0, null, null, "ChessGame", null);
 
@@ -36,7 +36,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void testNewGameRequest_ThrowsException() {
+    public void testNewGameRequestThrowsException() {
         // Arrange
         GameData gameData = new GameData(0, null, null, "", null);  // Invalid game name
 
@@ -45,12 +45,12 @@ public class GameServiceTest {
             gameService.newGameRequest(gameData);
         });
 
-        assertEquals(400, thrown.StatusCode());
+        assertEquals(400, thrown.statusCode());
         assertEquals("Error: bad request", thrown.getMessage());
     }
 
     @Test
-    public void testListGamesRequest_Success() {
+    public void testListGamesRequestSuccess() {
         // Arrange
         GameData gameData = new GameData(0, null, null, "ChessGame", null);
         try {
@@ -68,7 +68,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void testListGamesRequest_NoGames() {
+    public void testListGamesRequestNoGames() {
         // Act
         ListGamesResponse response = gameService.listGamesRequest();
 
@@ -78,7 +78,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void testJoinGame_Success() throws ResponseException {
+    public void testJoinGameSuccess() throws ResponseException {
         // Arrange
         GameData gameData = new GameData(0, null, null, "ChessGame", null);
         try {
@@ -102,7 +102,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void testJoinGame_ThrowsException() {
+    public void testJoinGameThrowsException() {
         // Arrange
         JoinGameRequest joinRequest = new JoinGameRequest(null, "WHITE");
 
@@ -111,7 +111,7 @@ public class GameServiceTest {
             gameService.joinGame(joinRequest, "player1");
         });
 
-        assertEquals(400, thrown.StatusCode());
+        assertEquals(400, thrown.statusCode());
         assertEquals("Error: bad request", thrown.getMessage());
     }
 }

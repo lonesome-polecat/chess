@@ -29,7 +29,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void testRegisterRequest_Success() throws Exception {
+    public void testRegisterRequestSuccess() throws Exception {
         // Arrange
         UserData userData = new UserData("newUser", "password123", "user@example.com");
 
@@ -43,7 +43,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void testRegisterRequest_ThrowsException_UserExists() {
+    public void testRegisterRequestThrowsExceptionUserExists() {
         // Arrange
         UserData userData = new UserData("existingUser", "password123", "user@example.com");
 
@@ -60,12 +60,12 @@ public class AuthServiceTest {
             authService.registerRequest(userData);
         });
 
-        assertEquals(403, thrown.StatusCode());
+        assertEquals(403, thrown.statusCode());
         assertEquals( "Error: already taken", thrown.getMessage());
     }
 
      @Test
-    public void testLoginRequest_Success() throws Exception {
+    public void testLoginRequestSuccess() throws Exception {
         // Arrange
         UserData userData = new UserData("loginUser", "password123", "login@example.com");
 
@@ -82,7 +82,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void testLoginRequest_ThrowsException_InvalidPassword() throws Exception {
+    public void testLoginRequestThrowsExceptionInvalidPassword() throws Exception {
         // Arrange
         UserData validUserData = new UserData("loginUser", "password123", "login@example.com");
 
@@ -97,11 +97,11 @@ public class AuthServiceTest {
             authService.loginRequest(invalidUserData);
         });
 
-        assertEquals(401, thrown.StatusCode());
+        assertEquals(401, thrown.statusCode());
         assertEquals("Error: unauthorized", thrown.getMessage());
     }
      @Test
-    public void testLoginRequest_ThrowsException_UnregisteredUser() throws Exception {
+    public void testLoginRequestThrowsExceptionUnregisteredUser() throws Exception {
         // Arrange
         // Try to log in with an unregistered user
         UserData invalidUserData = new UserData("loginUser", "wrongpassword", "login@example.com");
@@ -111,12 +111,12 @@ public class AuthServiceTest {
             authService.loginRequest(invalidUserData);
         });
 
-        assertEquals(401, thrown.StatusCode());
+        assertEquals(401, thrown.statusCode());
         assertEquals("Error: unauthorized", thrown.getMessage());
     }
 
    @Test
-    public void testClearDB_Success() throws Exception {
+    public void testClearDBSuccess() throws Exception {
         // Arrange: Register a user
         UserData userData = new UserData("testUser", "password123", "test@example.com");
         authService.registerRequest(userData);
@@ -142,12 +142,12 @@ public class AuthServiceTest {
     });
 
     // Assert that the exception thrown is a 401 Unauthorized error
-    assertEquals(401, thrown.StatusCode());
+    assertEquals(401, thrown.statusCode());
     assertEquals("Error: unauthorized", thrown.getMessage());
     }
 
     @Test
-    public void testClearDB_Failure() throws Exception {
+    public void testClearDBFailure() throws Exception {
         // Arrange: Register a user
         UserData userData = new UserData("testUser", "password123", "test@example.com");
         authService.registerRequest(userData);
@@ -167,7 +167,7 @@ public class AuthServiceTest {
         });
 
         // Assert the exception details
-        assertEquals(500, thrown.StatusCode());
+        assertEquals(500, thrown.statusCode());
         assertEquals("Failed to clear database", thrown.getMessage());
 
         // Verify that the games still exist after the failed attempt to clear

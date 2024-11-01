@@ -10,7 +10,7 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessBoard {
-    public int BOARD_SIZE = 8;
+    public static int BOARD_SIZE = 8;
     private ChessPiece[][] squares = new ChessPiece[BOARD_SIZE][BOARD_SIZE];
 
     public ChessBoard() {

@@ -1,6 +1,5 @@
 package server;
 
-import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
 import model.*;
 import service.*;
@@ -40,7 +39,7 @@ public class Server {
     }
 
     private void exceptionHandler(ResponseException ex, Request req, Response res) {
-        res.status(ex.StatusCode());
+        res.status(ex.statusCode());
         res.type("application/json");
         var response = new ErrorResponse(ex.getMessage());
         res.body(new Gson().toJson(response));
