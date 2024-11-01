@@ -111,11 +111,11 @@ public class AuthService {
         }
     }
 
-    public void logoutRequest(String authToken) {
+    public void logoutRequest(String authToken) throws ResponseException {
         try {
             authDAO.deleteAuth(authToken);
         } catch (dataaccess.DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new ResponseException(401, "Error: unauthorized");
         }
     }
 }

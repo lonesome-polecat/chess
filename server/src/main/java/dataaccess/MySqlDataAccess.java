@@ -62,7 +62,11 @@ public class MySqlDataAccess implements DataAccess {
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "DELETE from auth where authToken=?";
                 try (var ps = conn.prepareStatement(statement)) {
-                    ps.executeUpdate(authToken);
+                    ps.setString(1, authToken);
+                    var rowsAffected = ps.executeUpdate();
+                    if (rowsAffected < 1) {
+                        throw new DataAccessException("Error: invalid authToken");
+                    }
                 }
             } catch (Exception e) {
                 throw new DataAccessException("Error: cannot delete from auth table");
@@ -149,15 +153,21 @@ public class MySqlDataAccess implements DataAccess {
 
         public GameData createGame(GameData gameData) throws DataAccessException {
             // Insert GameData object into game table
+            int gameId = 0;
             var game = new ChessGame();
             var gameString = new Gson().toJson(game);
+
             try (var conn = DatabaseManager.getConnection()) {
                 var statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, gameString) VALUES (null, null, ?, ?)";
                 try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                     ps.setString(1, (gameData.gameName()));
                     ps.setString(2, (gameString));
-                    var id = ps.executeUpdate();
-                    return new GameData(id, null, null, gameData.gameName(), game);
+                    ps.executeUpdate();
+                    var rs = ps.getGeneratedKeys();
+                    if (rs.next()) {
+                        gameId = rs.getInt(1);
+                    }
+                    return new GameData(gameId, null, null, gameData.gameName(), game);
                 }
             } catch (Exception e) {
                 throw new DataAccessException("Error: cannot create game");
