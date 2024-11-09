@@ -28,6 +28,12 @@ public class ServerFacade {
         authToken = response.authToken();
     }
 
+    public void loginUser(UserData loginRequest) throws ResponseException {
+        var path = "/session";
+        var response = makeRequest("POST", path, loginRequest, AuthData.class);
+        authToken = response.authToken();
+    }
+
     public void clearDB() throws ResponseException {
         var path = "/db";
         var response = makeRequest("DELETE", path, null, Object.class);

@@ -50,4 +50,21 @@ public class ServerFacadeTests {
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
     }
+
+    @Test
+    public void loginUserTestInvalidPassword() {
+        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        UserData registerRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+
+        UserData loginRequest = new UserData("", "", null);
+        Assertions.assertThrows(ResponseException.class, () -> serverFacade.loginUser(loginRequest));
+    }
+
+    @Test
+    public void loginUserTestValidRequest() {
+        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        UserData registerRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+    }
 }
