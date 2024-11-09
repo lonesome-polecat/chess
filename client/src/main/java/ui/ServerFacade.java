@@ -1,10 +1,7 @@
 package ui;
 
 import com.google.gson.Gson;
-import model.AuthData;
-import model.GameData;
-import model.NewGameResponse;
-import model.UserData;
+import model.*;
 import server.ResponseException;
 
 import java.io.IOException;
@@ -38,13 +35,17 @@ public class ServerFacade {
 
     public void logoutUser() throws ResponseException {
         var path = "/session";
-        var response = makeRequest("DELETE", path, null, Object.class);
+        makeRequest("DELETE", path, null, Object.class);
     }
 
     public NewGameResponse createGame(GameData createGameRequest) throws ResponseException {
         var path = "/game";
-        var response = makeRequest("POST", path, createGameRequest, NewGameResponse.class);
-        return response;
+        return makeRequest("POST", path, createGameRequest, NewGameResponse.class);
+    }
+
+    public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
+        var path = "/game";
+        makeRequest("PUT", path, joinGameRequest, Object.class);
     }
 
     public void clearDB() throws ResponseException {

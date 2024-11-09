@@ -1,6 +1,7 @@
 package client;
 
 import model.GameData;
+import model.JoinGameRequest;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.ResponseException;
@@ -112,5 +113,33 @@ public class ServerFacadeTests {
         var newGame = new GameData(0, null, null, "myGame", null);
         var response = Assertions.assertDoesNotThrow(() -> serverFacade.createGame(newGame));
         Assertions.assertEquals(1, response.gameID());
+    }
+
+    @Test
+    public void joinGameTestInvalidGameId() {
+        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        UserData registerRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+
+        var newGame = new GameData(0, null, null, "myGame", null);
+        var response = Assertions.assertDoesNotThrow(() -> serverFacade.createGame(newGame));
+        Assertions.assertEquals(1, response.gameID());
+
+        var joinGameRequest = new JoinGameRequest("2", "WHITE");
+        Assertions.assertThrows(ResponseException.class, () -> serverFacade.joinGame(joinGameRequest));
+    }
+
+    @Test
+    public void joinGameTestValidRequest() {
+        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        UserData registerRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+
+        var newGame = new GameData(0, null, null, "myGame", null);
+        var response = Assertions.assertDoesNotThrow(() -> serverFacade.createGame(newGame));
+        Assertions.assertEquals(1, response.gameID());
+
+        var joinGameRequest = new JoinGameRequest("1", "WHITE");
+        Assertions.assertDoesNotThrow(() -> serverFacade.joinGame(joinGameRequest));
     }
 }
