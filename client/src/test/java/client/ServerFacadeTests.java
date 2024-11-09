@@ -48,7 +48,7 @@ public class ServerFacadeTests {
     public void registerUserTestValidRequest() {
         var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
-        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest));
     }
 
     @Test
@@ -57,7 +57,7 @@ public class ServerFacadeTests {
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
 
-        UserData loginRequest = new UserData("", "", null);
+        UserData loginRequest = new UserData("player1", "wrongpassword", null);
         Assertions.assertThrows(ResponseException.class, () -> serverFacade.loginUser(loginRequest));
     }
 
@@ -66,5 +66,8 @@ public class ServerFacadeTests {
         var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+
+        UserData loginRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.loginUser(loginRequest));
     }
 }
