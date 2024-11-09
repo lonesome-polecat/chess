@@ -70,4 +70,25 @@ public class ServerFacadeTests {
         UserData loginRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.loginUser(loginRequest));
     }
+
+    @Test
+    public void logoutUserTestInvalidToken() {
+        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        UserData registerRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+        // Logout user with current authToken
+        Assertions.assertDoesNotThrow(() -> serverFacade.logoutUser());
+
+        // Now that user has been logged out the authToken should be invalid
+        Assertions.assertThrows(ResponseException.class, () -> serverFacade.logoutUser());
+    }
+
+    @Test
+    public void logoutUserTestValidToken() {
+        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        UserData registerRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+        // Logout user with current authToken
+        Assertions.assertDoesNotThrow(() -> serverFacade.logoutUser());
+    }
 }

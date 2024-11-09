@@ -34,6 +34,11 @@ public class ServerFacade {
         authToken = response.authToken();
     }
 
+    public void logoutUser() throws ResponseException {
+        var path = "/session";
+        var response = makeRequest("DELETE", path, null, Object.class);
+    }
+
     public void clearDB() throws ResponseException {
         var path = "/db";
         var response = makeRequest("DELETE", path, null, Object.class);
@@ -44,6 +49,7 @@ public class ServerFacade {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
+            http.setRequestProperty("Authorization", authToken);
             http.setDoOutput(true);
 
             writeBody(request, http);
