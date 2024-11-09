@@ -31,6 +31,9 @@ public class AuthService {
             if (userData.username() == null || userData.password() == null) {
                 throw new ResponseException(400, "Error: bad request");
             }
+            if (userData.username().equals("") || userData.password().equals("")) {
+                throw new ResponseException(400, "Error: bad request");
+            }
             try {
                 String hashedPassword = BCrypt.hashpw(userData.password(), BCrypt.gensalt());
                 userDAO.createUser(new UserData(userData.username(), hashedPassword, userData.email()));

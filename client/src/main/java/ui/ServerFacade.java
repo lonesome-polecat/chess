@@ -1,5 +1,8 @@
+package ui;
+
 import com.google.gson.Gson;
-import jdk.jshell.spi.ExecutionControl;
+import model.AuthData;
+import model.UserData;
 import server.ResponseException;
 
 import java.io.IOException;
@@ -12,20 +15,23 @@ import java.net.URL;
 
 public class ServerFacade {
 
-    private String serverUrl;
-//
-//    public RegisterResult register(RegisterRequest) {
-//
-//    }
-//
-//    public LoginResult login(LoginRequest) {
-//
-//    }
-//
-//    public JoinResult join(joinGameRequest) {
-//        throw new ExecutionControl.NotImplementedException("This is not implemented");
-//    }
-//
+    private final String serverUrl;
+    private String authToken;
+
+    public ServerFacade(String url) {
+        serverUrl = url;
+    }
+
+    public void registerUser(UserData registerRequest) throws ResponseException {
+        var path = "/user";
+        var response = makeRequest("POST", path, registerRequest, AuthData.class);
+        authToken = response.authToken();
+    }
+
+    public void clearDB() throws ResponseException {
+        var path = "/db";
+        var response = makeRequest("DELETE", path, null, Object.class);
+    }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
