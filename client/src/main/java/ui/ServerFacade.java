@@ -2,6 +2,8 @@ package ui;
 
 import com.google.gson.Gson;
 import model.AuthData;
+import model.GameData;
+import model.NewGameResponse;
 import model.UserData;
 import server.ResponseException;
 
@@ -37,6 +39,12 @@ public class ServerFacade {
     public void logoutUser() throws ResponseException {
         var path = "/session";
         var response = makeRequest("DELETE", path, null, Object.class);
+    }
+
+    public NewGameResponse createGame(GameData createGameRequest) throws ResponseException {
+        var path = "/game";
+        var response = makeRequest("POST", path, createGameRequest, NewGameResponse.class);
+        return response;
     }
 
     public void clearDB() throws ResponseException {

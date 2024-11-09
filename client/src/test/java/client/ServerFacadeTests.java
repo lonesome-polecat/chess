@@ -1,5 +1,6 @@
 package client;
 
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.ResponseException;
@@ -90,5 +91,26 @@ public class ServerFacadeTests {
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
         // Logout user with current authToken
         Assertions.assertDoesNotThrow(() -> serverFacade.logoutUser());
+    }
+
+    @Test
+    public void createGameTestInvalidGameName() {
+        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        UserData registerRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+
+        var newGame = new GameData(0, null, null, null, null);
+        Assertions.assertThrows(ResponseException.class, () -> serverFacade.createGame(newGame));
+    }
+
+    @Test
+    public void createGameTestValidRequest() {
+        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        UserData registerRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+
+        var newGame = new GameData(0, null, null, "myGame", null);
+        var response = Assertions.assertDoesNotThrow(() -> serverFacade.createGame(newGame));
+        Assertions.assertEquals(1, response.gameID());
     }
 }
