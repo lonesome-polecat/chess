@@ -48,6 +48,11 @@ public class ServerFacade {
         makeRequest("PUT", path, joinGameRequest, Object.class);
     }
 
+    public ListGamesResponse listGames() throws ResponseException {
+        var path = "/game";
+        return makeRequest("GET", path, null, ListGamesResponse.class);
+    }
+
     public void clearDB() throws ResponseException {
         var path = "/db";
         var response = makeRequest("DELETE", path, null, Object.class);

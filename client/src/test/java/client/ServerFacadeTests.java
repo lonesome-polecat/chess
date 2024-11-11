@@ -1,12 +1,16 @@
 package client;
 
+import chess.ChessGame;
 import model.GameData;
 import model.JoinGameRequest;
+import model.ListGamesResponse;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.ResponseException;
 import server.Server;
 import ui.ServerFacade;
+
+import java.util.LinkedList;
 
 
 public class ServerFacadeTests {
@@ -142,4 +146,48 @@ public class ServerFacadeTests {
         var joinGameRequest = new JoinGameRequest("1", "WHITE");
         Assertions.assertDoesNotThrow(() -> serverFacade.joinGame(joinGameRequest));
     }
+
+    @Test
+    public void listGamesTestInvalidToken() {
+        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        UserData registerRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+
+        var firstGame = new GameData(0, null, null, "myGame", null);
+        var response = Assertions.assertDoesNotThrow(() -> serverFacade.createGame(firstGame));
+        Assertions.assertEquals(1, response.gameID());
+
+        var secondGame = new GameData(0, null, null, "myGame", null);
+        response = Assertions.assertDoesNotThrow(() -> serverFacade.createGame(secondGame));
+        Assertions.assertEquals(2, response.gameID());
+
+        // Logout user with current authToken
+        Assertions.assertDoesNotThrow(() -> serverFacade.logoutUser());
+
+        Assertions.assertThrows(ResponseException.class, () -> serverFacade.listGames());
+    }
+
+    @Test
+    public void listGamesTestValidRequest() {
+        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        UserData registerRequest = new UserData("player1", "player1", null);
+        Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
+
+        var firstGame = new GameData(1, null, null, "myGame", new ChessGame());
+        var response = Assertions.assertDoesNotThrow(() -> serverFacade.createGame(firstGame));
+        Assertions.assertEquals(1, response.gameID());
+
+        var secondGame = new GameData(2, null, null, "myGame", new ChessGame());
+        response = Assertions.assertDoesNotThrow(() -> serverFacade.createGame(secondGame));
+        Assertions.assertEquals(2, response.gameID());
+
+        LinkedList<GameData> games = new LinkedList<GameData>();
+        games.add(firstGame);
+        games.add(secondGame);
+        var expectedGames = new ListGamesResponse(games);
+
+        var listGamesResponse = Assertions.assertDoesNotThrow(() -> serverFacade.listGames());
+        Assertions.assertEquals(expectedGames, listGamesResponse);
+    }
+
 }

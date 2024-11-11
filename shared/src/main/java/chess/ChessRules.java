@@ -553,4 +553,17 @@ public class ChessRules {
         ChessPosition kingPosition = board.getSpecificPiecePosition(ChessPiece.PieceType.KING, teamColor);
         return teamAttackVectors.get(enemyColor).contains(kingPosition);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessRules that = (ChessRules) o;
+        return Objects.equals(teamAttackVectors, that.teamAttackVectors);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(teamAttackVectors);
+    }
 }
