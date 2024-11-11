@@ -23,7 +23,10 @@ public class ServerFacadeTests {
         server = new Server();
         port = server.run(1999);
         System.out.println("Started test HTTP server on " + port);
+    }
 
+    @BeforeEach
+    public void clearDB() {
         var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
         try {
             serverFacade.clearDB();
