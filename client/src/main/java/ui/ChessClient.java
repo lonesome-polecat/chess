@@ -1,6 +1,6 @@
 package ui;
 
-import model.UserData;
+import model.*;
 import server.ResponseException;
 
 import java.util.Arrays;
@@ -29,10 +29,10 @@ public class ChessClient {
             return switch (cmd) {
                 case "signin" -> signIn(params);
                 case "register" -> register(params);
-//                case "list" -> listPets();
+                case "newGame" -> createGame(params);
+                case "listGames" -> listGames();
+                case "joinGame" -> joinGame(params);
                 case "signout" -> signOut();
-//                case "adopt" -> adoptPet(params);
-//                case "adoptall" -> adoptAllPets();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -50,9 +50,9 @@ public class ChessClient {
                     """;
         }
         return """
-                - createGame <gameName>
+                - newGame <gameName>
                 - listGames
-                - joinGame <game id>
+                - joinGame <gameID> <teamColor>
                 - signOut
                 - quit
                 """;
@@ -98,5 +98,46 @@ public class ChessClient {
         }
         state = State.SIGNED_OUT;
         return "You are successfully signed out";
+    }
+
+    public String createGame(String[] params) throws ResponseException {
+        // make sure user is signIn
+        // create game and return gameID
+        if (state == State.SIGNED_OUT) {
+            throw new ResponseException(401, "You must first sign in");
+        }
+        if (params.length != 1) {
+            throw new ResponseException(400, "You must enter a name for the new game");
+        }
+        var gameName = params[0];
+        var newGame = new GameData(0, null, null, gameName, null);
+        NewGameResponse response = server.createGame(newGame);
+        return String.format("You created a new game with the gameID: %d", response.gameID());
+    }
+
+    public String listGames() throws ResponseException {
+        // make sure user is signIn
+        // list all existing games
+        if (state == State.SIGNED_OUT) {
+            throw new ResponseException(401, "You must first sign in");
+        }
+        ListGamesResponse response = server.listGames();
+        return response.toString();
+    }
+
+    public String joinGame(String[] params) throws ResponseException {
+        // make sure user is signIn
+        // return a list of all existing games
+        if (state == State.SIGNED_OUT) {
+            throw new ResponseException(401, "You must first sign in");
+        }
+        if (params.length != 2) {
+            throw new ResponseException(400, "You must enter a gameID and team color to join");
+        }
+        var gameID = params[0];
+        var playerColor = params[1];
+        var joinGameRequest = new JoinGameRequest(gameID, playerColor);
+        server.joinGame(joinGameRequest);
+        return String.format("You joined a game as %s team", playerColor);
     }
 }
