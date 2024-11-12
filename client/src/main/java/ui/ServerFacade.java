@@ -15,7 +15,7 @@ import java.net.URL;
 public class ServerFacade {
 
     private final String serverUrl;
-    private String authToken;
+    private String authToken = "";
 
     public ServerFacade(String url) {
         serverUrl = url;
@@ -36,6 +36,7 @@ public class ServerFacade {
     public void logoutUser() throws ResponseException {
         var path = "/session";
         makeRequest("DELETE", path, null, Object.class);
+        authToken = "";
     }
 
     public NewGameResponse createGame(GameData createGameRequest) throws ResponseException {

@@ -1,19 +1,25 @@
 package ui;
 
-import com.sun.nio.sctp.NotificationHandler;
+import model.UserData;
 import server.ResponseException;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
-    private final NotificationHandler notificationHandler;
+    private State state;
 
-    public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
+    private enum State {
+            SIGNED_IN,
+            SIGNED_OUT
+    }
+
+    public ChessClient(String serverUrl) {
         this.serverUrl = serverUrl;
         this.server = new ServerFacade(serverUrl);
-        this.notificationHandler = notificationHandler;
+        this.state = State.SIGNED_OUT;
     }
 
     public String eval(String input) {
@@ -23,12 +29,12 @@ public class ChessClient {
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
 //                case "signin" -> signIn(params);
-//                case "rescue" -> rescuePet(params);
+                case "register" -> register(params);
 //                case "list" -> listPets();
 //                case "signout" -> signOut();
 //                case "adopt" -> adoptPet(params);
 //                case "adoptall" -> adoptAllPets();
-//                case "quit" -> "quit";
+                case "quit" -> quit();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -36,7 +42,42 @@ public class ChessClient {
         }
     }
 
-    private String help() throws ResponseException {
-        return "";
+    public String help() {
+        if (state == State.SIGNED_OUT) {
+            return """
+                    - signIn <username> <password>
+                    - register <username> <password> <email>
+                    - quit
+                    """;
+        }
+        return """
+                - createGame <gameName>
+                - listGames
+                - joinGame <game id>
+                - signOut
+                - quit
+                """;
+    }
+
+    public String register(String[] params) throws ResponseException {
+        for (var param : params) {
+            System.out.println(param);
+        }
+        if (params.length < 2 || params.length > 3) {
+            throw new ResponseException(400, "You must enter a username and password to register (email is optional)");
+        }
+        var username = params[0];
+        var password = params[1];
+        String email = null;
+        if (params.length == 3) {
+            email = params[2];
+        }
+        server.registerUser(new UserData(username, password, email));
+        state = State.SIGNED_IN;
+        return String.format("Successfully registered new user %s", username);
+    }
+
+    public String quit() throws ResponseException {
+        throw new ResponseException(500, "Not implemented");
     }
 }

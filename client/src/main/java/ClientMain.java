@@ -8,5 +8,6 @@ public class ClientMain {
 
         var serverUrl = "http://localhost:8080";
         var repl = new Repl(serverUrl);
+        repl.run();
     }
 }
