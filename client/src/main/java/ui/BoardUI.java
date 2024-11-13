@@ -14,7 +14,12 @@ public class BoardUI {
     private static PrintStream out = System.out;
     private static String lightBGColor = SET_BG_COLOR_GREEN;
     private static String darkBGColor = SET_BG_COLOR_DARK_GREEN;
-    private static String borderColor = SET_BG_COLOR_LIGHT_GREY;
+    private static String borderBGColor = SET_BG_COLOR_DARK_GREY;
+
+    private static String borderTextColor = SET_TEXT_COLOR_LIGHT_GREY;
+    private static String whiteTeamColor = SET_TEXT_COLOR_WHITE;
+    private static String blackTeamColor = SET_TEXT_COLOR_BLACK;
+
     private static String[] ROW_NUMBERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
     private static String[] COL_LETTERS = {"h", "g", "f", "e", "d", "c", "b", "a"};
 
@@ -42,13 +47,7 @@ public class BoardUI {
                     tileColor = switchTileColor(tileColor);
                 }
                 setTileColor(tileColor);
-                var pos = new ChessPosition(i-1, j);
-                var piece = board.getPiece(pos);
-                String icon = " ";
-                if (piece != null) {
-                    icon = getIconFromPieceType(piece.getPieceType());
-                }
-                out.printf(" %s ", icon);
+                printPiece(i, j, board);
             }
             printSideBorder(i, teamColor);
             out.println(RESET_BG_COLOR);
@@ -57,7 +56,7 @@ public class BoardUI {
     }
 
     private static void printHeaders(ChessGame.TeamColor teamColor) {
-        out.print(borderColor);
+        out.print(borderBGColor + borderTextColor);
         out.print("   ");
         if (teamColor == ChessGame.TeamColor.WHITE) {
             for (int i = 0; i < COL_LETTERS.length; i++) {
@@ -69,17 +68,33 @@ public class BoardUI {
             }
         }
         out.print("   ");
-        out.println(RESET_BG_COLOR);
+        out.println(RESET_BG_COLOR + RESET_TEXT_COLOR);
     }
 
     private static void printSideBorder(int index, ChessGame.TeamColor teamColor) {
         // Index will come in as 2-9, need to adjust for that
-        out.print(borderColor);
+        out.print(borderBGColor + borderTextColor);
         if (teamColor == ChessGame.TeamColor.WHITE) {
             out.printf(" %s ", ROW_NUMBERS[index-2]);
         } else {
             out.printf(" %s ", ROW_NUMBERS[9-index]);
         }
+    }
+
+    private static void printPiece(int i_index, int j_index, ChessBoard board) {
+        var pos = new ChessPosition(i_index-1, j_index);
+        var piece = board.getPiece(pos);
+        String icon = " ";
+        if (piece != null) {
+            var teamColor = piece.getTeamColor();
+            if (teamColor == ChessGame.TeamColor.WHITE) {
+                out.print(whiteTeamColor);
+            } else {
+                out.print(blackTeamColor);
+            }
+            icon = getIconFromPieceType(piece.getPieceType());
+        }
+        out.printf(" %s ", icon);
     }
 
     private static TileColor switchTileColor(TileColor tileColor) {
