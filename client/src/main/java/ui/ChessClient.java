@@ -188,7 +188,7 @@ public class ChessClient {
         for (var game : allGames.games()) {
             if (game.gameID() == Integer.parseInt(gameID)) {
                 var chessGame = game.game();
-                BoardUI.drawBoard(chessGame.getBoard());
+                BoardUI.drawBoard(chessGame.getBoard(), ChessGame.TeamColor.WHITE);
             }
         }
     }
