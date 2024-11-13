@@ -71,7 +71,11 @@ public class ChessClient {
         if (params.length == 3) {
             email = params[2];
         }
-        server.registerUser(new UserData(username, password, email));
+        try {
+            server.registerUser(new UserData(username, password, email));
+        } catch (ResponseException e) {
+            return "That username is already taken";
+        }
         state = State.SIGNED_IN;
         return String.format("Successfully registered new user\nYou are now signed in as %s", username);
     }
@@ -85,7 +89,11 @@ public class ChessClient {
         }
         var username = params[0];
         var password = params[1];
-        server.loginUser(new UserData(username, password, null));
+        try {
+            server.loginUser(new UserData(username, password, null));
+        } catch (ResponseException e) {
+            return "Invalid credentials";
+        }
         state = State.SIGNED_IN;
         return String.format("You are signed in as %s", username);
     }
@@ -94,7 +102,7 @@ public class ChessClient {
         try {
             server.logoutUser();
         } catch (ResponseException e) {
-            throw new ResponseException(401, "Error: unable to sign out user");
+            return "Error: unable to sign out user";
         }
         state = State.SIGNED_OUT;
         return "You are successfully signed out";
@@ -111,8 +119,12 @@ public class ChessClient {
         }
         var gameName = params[0];
         var newGame = new GameData(0, null, null, gameName, null);
-        NewGameResponse response = server.createGame(newGame);
-        return String.format("You created a new game with the gameID: %d", response.gameID());
+        try {
+            NewGameResponse response = server.createGame(newGame);
+            return String.format("You created a new game with the gameID: %d", response.gameID());
+        } catch (ResponseException e) {
+            return "Error: unable to create new game";
+        }
     }
 
     public String listGames() throws ResponseException {
@@ -121,8 +133,12 @@ public class ChessClient {
         if (state == State.SIGNED_OUT) {
             throw new ResponseException(401, "You must first sign in");
         }
-        ListGamesResponse response = server.listGames();
-        return response.toString();
+        try {
+            ListGamesResponse response = server.listGames();
+            return response.toString();
+        } catch (ResponseException e) {
+            return "Error: unable to list games";
+        }
     }
 
     public String joinGame(String[] params) throws ResponseException {
@@ -135,9 +151,18 @@ public class ChessClient {
             throw new ResponseException(400, "You must enter a gameID and team color to join");
         }
         var gameID = params[0];
-        var playerColor = params[1];
+        var playerColor = params[1].toUpperCase();
+        // Make sure playerColor is correct string
+        if (!playerColor.equals("BLACK") && !playerColor.equals("WHITE")) {
+            return "Must specify color to join as: BLACK or WHITE";
+        }
+
         var joinGameRequest = new JoinGameRequest(gameID, playerColor);
-        server.joinGame(joinGameRequest);
-        return String.format("You joined a game as %s team", playerColor);
+        try {
+            server.joinGame(joinGameRequest);
+            return String.format("You joined a game as %s team", playerColor);
+        } catch (ResponseException e) {
+            return "Error: unable to join game";
+        }
     }
 }
