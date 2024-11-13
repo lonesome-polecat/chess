@@ -36,8 +36,7 @@ public class BoardUI {
                 printHeaders(teamColor);
                 continue;
             }
-            out.printf(borderColor);
-            out.printf(" B ");
+            printSideBorder(i, teamColor);
             for (int j = 1; j <= board.boardSize; j++) {
                 if (j != 1) {
                     tileColor = switchTileColor(tileColor);
@@ -51,8 +50,7 @@ public class BoardUI {
                 }
                 out.printf(" %s ", icon);
             }
-            out.printf(borderColor);
-            out.printf(" B ");
+            printSideBorder(i, teamColor);
             out.println(RESET_BG_COLOR);
         }
         out.println(RESET_BG_COLOR);
@@ -72,6 +70,16 @@ public class BoardUI {
         }
         out.print("   ");
         out.println(RESET_BG_COLOR);
+    }
+
+    private static void printSideBorder(int index, ChessGame.TeamColor teamColor) {
+        // Index will come in as 2-9, need to adjust for that
+        out.print(borderColor);
+        if (teamColor == ChessGame.TeamColor.WHITE) {
+            out.printf(" %s ", ROW_NUMBERS[index-2]);
+        } else {
+            out.printf(" %s ", ROW_NUMBERS[9-index]);
+        }
     }
 
     private static TileColor switchTileColor(TileColor tileColor) {
