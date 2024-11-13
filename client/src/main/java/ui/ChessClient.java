@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import model.*;
 import server.ResponseException;
 
@@ -9,6 +10,7 @@ public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
     private State state;
+    private ListGamesResponse allGames = null;
 
     private enum State {
             SIGNED_IN,
@@ -29,9 +31,9 @@ public class ChessClient {
             return switch (cmd) {
                 case "signin" -> signIn(params);
                 case "register" -> register(params);
-                case "newGame" -> createGame(params);
-                case "listGames" -> listGames();
-                case "joinGame" -> joinGame(params);
+                case "newgame" -> createGame(params);
+                case "listgames" -> listGames();
+                case "joingame" -> joinGame(params);
                 case "signout" -> signOut();
                 case "quit" -> "quit";
                 default -> help();
@@ -135,7 +137,8 @@ public class ChessClient {
         }
         try {
             ListGamesResponse response = server.listGames();
-            return response.toString();
+            allGames = response;
+            return printGames(response);
         } catch (ResponseException e) {
             return "Error: unable to list games";
         }
@@ -160,9 +163,33 @@ public class ChessClient {
         var joinGameRequest = new JoinGameRequest(gameID, playerColor);
         try {
             server.joinGame(joinGameRequest);
+            displayGame(gameID, playerColor);
             return String.format("You joined a game as %s team", playerColor);
         } catch (ResponseException e) {
             return "Error: unable to join game";
+        }
+    }
+
+    private String printGames(ListGamesResponse allGames) {
+        if (allGames == null) {
+            return "No games have been listed";
+        } else if (allGames.games().isEmpty()) {
+            return "No games have been created";
+        }
+
+        String gameList = "";
+        for (var game : allGames.games()) {
+            gameList = gameList.concat(String.format("%s: %s (BLACK: %s, WHITE: %s)\n", game.gameID(), game.gameName(), game.blackUsername(), game.whiteUsername()));
+        }
+        return gameList;
+    }
+
+    private void displayGame(String gameID, String playerColor) {
+        for (var game : allGames.games()) {
+            if (game.gameID() == Integer.parseInt(gameID)) {
+                var chessGame = game.game();
+                BoardUI.drawBoard(chessGame.getBoard());
+            }
         }
     }
 }
