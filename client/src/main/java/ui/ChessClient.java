@@ -3,6 +3,7 @@ package ui;
 import chess.ChessGame;
 import model.*;
 import server.ResponseException;
+import spark.Response;
 
 import java.util.Arrays;
 
@@ -33,7 +34,8 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "newgame" -> createGame(params);
                 case "listgames" -> listGames();
-                case "joingame" -> joinGame(params);
+                case "playgame" -> joinGame(params);
+                case "observegame" -> observeGame(params);
                 case "signout" -> signOut();
                 case "quit" -> "quit";
                 default -> help();
@@ -54,7 +56,8 @@ public class ChessClient {
         return """
                 - newGame <gameName>
                 - listGames
-                - joinGame <gameID> <teamColor>
+                - playGame <gameID> <teamColor>
+                - observeGame <gameID>
                 - signOut
                 - quit
                 """;
@@ -79,6 +82,7 @@ public class ChessClient {
             return "That username is already taken";
         }
         state = State.SIGNED_IN;
+        initGamesList();
         return String.format("Successfully registered new user\nYou are now signed in as %s", username);
     }
 
@@ -97,6 +101,7 @@ public class ChessClient {
             return "Invalid credentials";
         }
         state = State.SIGNED_IN;
+        initGamesList();
         return String.format("You are signed in as %s", username);
     }
 
@@ -168,6 +173,26 @@ public class ChessClient {
         } catch (ResponseException e) {
             return "Error: unable to join game";
         }
+    }
+
+    public String observeGame(String[] params) throws ResponseException {
+        // make sure user is signIn
+        // return a list of all existing games
+        if (state == State.SIGNED_OUT) {
+            throw new ResponseException(401, "You must first sign in");
+        }
+        if (params.length != 1) {
+            throw new ResponseException(400, "You must enter a gameID to join");
+        }
+        var gameID = params[0];
+
+        displayGame(gameID, "WHITE");
+        return "You joined a game as an observer";
+    }
+
+    private void initGamesList() throws ResponseException {
+        // Once user is logged in fetch games in background
+        allGames = server.listGames();
     }
 
     private String printGames(ListGamesResponse allGames) {
