@@ -12,7 +12,7 @@ import static ui.EscapeSequences.*;
 public class BoardUI {
 
     private static PrintStream out = System.out;
-    private static String lightBGColor = SET_BG_COLOR_GREEN;
+    private static String lightBGColor = SET_BG_COLOR_ORANGE;
     private static String darkBGColor = SET_BG_COLOR_DARK_GREEN;
     private static String borderBGColor = SET_BG_COLOR_DARK_GREY;
 
@@ -47,7 +47,7 @@ public class BoardUI {
                     tileColor = switchTileColor(tileColor);
                 }
                 setTileColor(tileColor);
-                printPiece(i, j, board);
+                printPiece(i, j, teamColor, board);
             }
             printSideBorder(i, teamColor);
             out.println(RESET_BG_COLOR);
@@ -81,13 +81,21 @@ public class BoardUI {
         }
     }
 
-    private static void printPiece(int i_index, int j_index, ChessBoard board) {
-        var pos = new ChessPosition(i_index-1, j_index);
+    private static void printPiece(int i_index, int j_index, ChessGame.TeamColor teamColor, ChessBoard board) {
+        // i_index comes in as 2-9
+        // j_index comes in as 1-8
+        // Compensate as need be
+        ChessPosition pos;
+        if (teamColor == ChessGame.TeamColor.WHITE) {
+            pos = new ChessPosition(10-i_index, 9-j_index);
+        } else {
+            pos = new ChessPosition(i_index-1, j_index);
+        }
         var piece = board.getPiece(pos);
         String icon = " ";
         if (piece != null) {
-            var teamColor = piece.getTeamColor();
-            if (teamColor == ChessGame.TeamColor.WHITE) {
+            var pieceTeamColor = piece.getTeamColor();
+            if (pieceTeamColor == ChessGame.TeamColor.WHITE) {
                 out.print(whiteTeamColor);
             } else {
                 out.print(blackTeamColor);
