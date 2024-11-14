@@ -81,15 +81,15 @@ public class BoardUI {
         }
     }
 
-    private static void printPiece(int i_index, int j_index, ChessGame.TeamColor teamColor, ChessBoard board) {
+    private static void printPiece(int iIndex, int jIndex, ChessGame.TeamColor teamColor, ChessBoard board) {
         // i_index comes in as 2-9
         // j_index comes in as 1-8
         // Compensate as need be
         ChessPosition pos;
         if (teamColor == ChessGame.TeamColor.WHITE) {
-            pos = new ChessPosition(10-i_index, 9-j_index);
+            pos = new ChessPosition(10-iIndex, 9-jIndex);
         } else {
-            pos = new ChessPosition(i_index-1, j_index);
+            pos = new ChessPosition(iIndex-1, jIndex);
         }
         var piece = board.getPiece(pos);
         String icon = " ";

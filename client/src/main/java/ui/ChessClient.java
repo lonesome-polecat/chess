@@ -203,7 +203,8 @@ public class ChessClient {
 
         String gameList = "";
         for (var game : allGames.games()) {
-            gameList = gameList.concat(String.format("%s: %s (BLACK: %s, WHITE: %s)\n", game.gameID(), game.gameName(), game.blackUsername(), game.whiteUsername()));
+            var str = String.format("%s: %s (BLACK: %s, WHITE: %s)\n", game.gameID(), game.gameName(), game.blackUsername(), game.whiteUsername());
+            gameList = gameList.concat(str);
         }
         return gameList;
     }
