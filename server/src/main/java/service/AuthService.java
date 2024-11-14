@@ -5,7 +5,7 @@ import model.AuthData;
 import model.RegisterResponse;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
-import server.ResponseException;
+import model.ResponseException;
 import spark.Request;
 
 public class AuthService {

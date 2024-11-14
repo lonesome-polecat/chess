@@ -5,7 +5,7 @@ import model.GameData;
 import model.JoinGameRequest;
 import model.ListGamesResponse;
 import model.NewGameResponse;
-import server.ResponseException;
+import model.ResponseException;
 
 import java.util.List;
 import java.util.Objects;

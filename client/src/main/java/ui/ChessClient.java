@@ -2,8 +2,7 @@ package ui;
 
 import chess.ChessGame;
 import model.*;
-import server.ResponseException;
-import spark.Response;
+import model.ResponseException;
 
 import java.util.Arrays;
 

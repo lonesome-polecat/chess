@@ -1,7 +1,6 @@
 package service;
 
 import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
 import model.GameData;
 import model.JoinGameRequest;
@@ -9,7 +8,7 @@ import model.ListGamesResponse;
 import model.NewGameResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.ResponseException;
+import model.ResponseException;
 
 import static org.junit.jupiter.api.Assertions.*;
 

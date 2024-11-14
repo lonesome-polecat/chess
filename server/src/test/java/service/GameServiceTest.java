@@ -6,7 +6,7 @@ import model.ListGamesResponse;
 import model.NewGameResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import server.ResponseException;
+import model.ResponseException;
 import dataaccess.MemoryDataAccess;
 
 import static org.junit.jupiter.api.Assertions.*;
