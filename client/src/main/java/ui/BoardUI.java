@@ -12,13 +12,13 @@ import static ui.EscapeSequences.*;
 public class BoardUI {
 
     private static final PrintStream out = System.out;
-    private static final String lightBGColor = SET_BG_COLOR_ORANGE;
-    private static final String darkBGColor = SET_BG_COLOR_DARK_GREEN;
-    private static final String borderBGColor = SET_BG_COLOR_DARK_GREY;
+    private static final String LIGHT_BG_COLOR = SET_BG_COLOR_ORANGE;
+    private static final String DARK_BG_COLOR = SET_BG_COLOR_DARK_GREEN;
+    private static final String BORDER_BG_COLOR = SET_BG_COLOR_DARK_GREY;
 
-    private static final String borderTextColor = SET_TEXT_COLOR_LIGHT_GREY;
-    private static final String whiteTeamColor = SET_TEXT_COLOR_WHITE;
-    private static final String blackTeamColor = SET_TEXT_COLOR_BLACK;
+    private static final String BORDER_TEXT_COLOR = SET_TEXT_COLOR_LIGHT_GREY;
+    private static final String WHITE_TEAM_COLOR = SET_TEXT_COLOR_WHITE;
+    private static final String BLACK_TEAM_COLOR = SET_TEXT_COLOR_BLACK;
 
     private static final String[] ROW_NUMBERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
     private static final String[] COL_LETTERS = {"h", "g", "f", "e", "d", "c", "b", "a"};
@@ -56,7 +56,7 @@ public class BoardUI {
     }
 
     private static void printHeaders(ChessGame.TeamColor teamColor) {
-        out.print(borderBGColor + borderTextColor);
+        out.print(BORDER_BG_COLOR + BORDER_TEXT_COLOR);
         out.print("   ");
         if (teamColor == ChessGame.TeamColor.WHITE) {
             for (int i = 0; i < COL_LETTERS.length; i++) {
@@ -73,7 +73,7 @@ public class BoardUI {
 
     private static void printSideBorder(int index, ChessGame.TeamColor teamColor) {
         // Index will come in as 2-9, need to adjust for that
-        out.print(borderBGColor + borderTextColor);
+        out.print(BORDER_BG_COLOR + BORDER_TEXT_COLOR);
         if (teamColor == ChessGame.TeamColor.WHITE) {
             out.printf(" %s ", ROW_NUMBERS[index-2]);
         } else {
@@ -96,9 +96,9 @@ public class BoardUI {
         if (piece != null) {
             var pieceTeamColor = piece.getTeamColor();
             if (pieceTeamColor == ChessGame.TeamColor.WHITE) {
-                out.print(whiteTeamColor);
+                out.print(WHITE_TEAM_COLOR);
             } else {
-                out.print(blackTeamColor);
+                out.print(BLACK_TEAM_COLOR);
             }
             icon = getIconFromPieceType(piece.getPieceType());
         }
@@ -116,9 +116,9 @@ public class BoardUI {
 
     private static void setTileColor(TileColor tileColor) {
         if (tileColor == TileColor.WHITE) {
-            out.printf(lightBGColor);
+            out.printf(LIGHT_BG_COLOR);
         } else if (tileColor == TileColor.BLACK) {
-            out.printf(darkBGColor);
+            out.printf(DARK_BG_COLOR);
         }
     }
 
