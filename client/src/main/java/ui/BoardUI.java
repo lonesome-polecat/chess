@@ -11,17 +11,17 @@ import static ui.EscapeSequences.*;
 
 public class BoardUI {
 
-    private static PrintStream out = System.out;
-    private static String lightBGColor = SET_BG_COLOR_ORANGE;
-    private static String darkBGColor = SET_BG_COLOR_DARK_GREEN;
-    private static String borderBGColor = SET_BG_COLOR_DARK_GREY;
+    private static final PrintStream out = System.out;
+    private static final String lightBGColor = SET_BG_COLOR_ORANGE;
+    private static final String darkBGColor = SET_BG_COLOR_DARK_GREEN;
+    private static final String borderBGColor = SET_BG_COLOR_DARK_GREY;
 
-    private static String borderTextColor = SET_TEXT_COLOR_LIGHT_GREY;
-    private static String whiteTeamColor = SET_TEXT_COLOR_WHITE;
-    private static String blackTeamColor = SET_TEXT_COLOR_BLACK;
+    private static final String borderTextColor = SET_TEXT_COLOR_LIGHT_GREY;
+    private static final String whiteTeamColor = SET_TEXT_COLOR_WHITE;
+    private static final String blackTeamColor = SET_TEXT_COLOR_BLACK;
 
-    private static String[] ROW_NUMBERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
-    private static String[] COL_LETTERS = {"h", "g", "f", "e", "d", "c", "b", "a"};
+    private static final String[] ROW_NUMBERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
+    private static final String[] COL_LETTERS = {"h", "g", "f", "e", "d", "c", "b", "a"};
 
     private enum TileColor {
         WHITE,
