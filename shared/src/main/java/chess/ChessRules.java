@@ -191,7 +191,6 @@ public class ChessRules {
             farSide = 1;
             homeRow = 8;
         }
-        var attackVectors =  new HashSet<ChessPosition>();
 
         var promotionPieces = new ArrayList<ChessPiece.PieceType>();
         if (getDifference(row, 1, color) == farSide) {
@@ -223,36 +222,13 @@ public class ChessRules {
         // then check left-diagonal attack
         if (col > 1) {
             possiblePos = new ChessPosition(getDifference(row, 1, color), col-1);
-            pieceOnSquare = board.getPiece(possiblePos);
-            if (pieceOnSquare != null) {
-                // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != color) {
-                    for (var promotionPiece : promotionPieces) {
-                        validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
-                    }
-                    attackVectors.add(possiblePos);
-                } else {
-                    attackVectors.add(possiblePos);
-                }
-            }
+            setPawnMvs(possiblePos, validMoves, board, startPos, promotionPieces);
         }
         // then check right-diagonal
         if (col < 8) {
             possiblePos = new ChessPosition(getDifference(row, 1, color), col+1);
-            pieceOnSquare = board.getPiece(possiblePos);
-            if (pieceOnSquare != null) {
-                // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != color) {
-                    for (var promotionPiece : promotionPieces) {
-                        validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
-                    }
-                    attackVectors.add(possiblePos);
-                } else {
-                    attackVectors.add(possiblePos);
-                }
-            }
+            setPawnMvs(possiblePos, validMoves, board, startPos, promotionPieces);
         }
-        teamAttackVectors.get(color).addAll(attackVectors);
     }
 
     public int getDifference(int row, int offset, ChessGame.TeamColor color) {
@@ -260,6 +236,22 @@ public class ChessRules {
             return row + offset;
         } else {
             return row - offset;
+        }
+    }
+
+    public void setPawnMvs(ChessPosition pos, ArrayList<ChessMove> mvs, ChessBoard brd, ChessPosition start, ArrayList<ChessPiece.PieceType> promos) {
+        var pieceOnSquare = brd.getPiece(pos);
+        var color = brd.getPiece(start).getTeamColor();
+        if (pieceOnSquare != null) {
+            // Only add possible move if the piece on square is an enemy piece
+            if (pieceOnSquare.getTeamColor() != color) {
+                for (var promotionPiece : promos) {
+                    mvs.add(new ChessMove(start, pos, promotionPiece));
+                }
+                teamAttackVectors.get(color).add(pos);
+            } else {
+                teamAttackVectors.get(color).add(pos);
+            }
         }
     }
 
