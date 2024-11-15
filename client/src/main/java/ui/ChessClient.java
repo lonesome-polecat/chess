@@ -56,8 +56,8 @@ public class ChessClient {
         return """
                 - createGame <gameName>
                 - listGames
-                - playGame <gameID> <teamColor>
-                - observeGame <gameID>
+                - playGame <game #> <teamColor>
+                - observeGame <game #>
                 - signOut
                 - quit
                 - help
@@ -186,13 +186,13 @@ public class ChessClient {
             throw new ResponseException(401, "You must first sign in");
         }
         if (params.length != 1) {
-            throw new ResponseException(400, "You must enter a gameID to join");
+            throw new ResponseException(400, "You must enter a game number to join");
         }
         var gameID = params[0];
 
         var result = displayGame(gameID, "WHITE");
         if (!result) {
-            return "Error: invalid gameID";
+            return "Error: invalid game number";
         }
         return "You joined a game as an observer";
     }
