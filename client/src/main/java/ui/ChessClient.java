@@ -167,7 +167,10 @@ public class ChessClient {
         var joinGameRequest = new JoinGameRequest(gameID, playerColor);
         try {
             server.joinGame(joinGameRequest);
-            displayGame(gameID, playerColor);
+            var result = displayGame(gameID, playerColor);
+            if (!result) {
+                return "Error: unable to join game";
+            }
             return String.format("You joined a game as %s team", playerColor);
         } catch (ResponseException e) {
             return "Error: unable to join game";
@@ -185,7 +188,10 @@ public class ChessClient {
         }
         var gameID = params[0];
 
-        displayGame(gameID, "WHITE");
+        var result = displayGame(gameID, "WHITE");
+        if (!result) {
+            return "Error: invalid gameID";
+        }
         return "You joined a game as an observer";
     }
 
@@ -209,13 +215,15 @@ public class ChessClient {
         return gameList;
     }
 
-    private void displayGame(String gameID, String playerColor) {
+    private boolean displayGame(String gameID, String playerColor) throws ResponseException {
         for (var game : allGames.games()) {
             if (game.gameID() == Integer.parseInt(gameID)) {
                 var chessGame = game.game();
                 BoardUI.drawBoard(chessGame.getBoard(), ChessGame.TeamColor.WHITE);
                 BoardUI.drawBoard(chessGame.getBoard(), ChessGame.TeamColor.BLACK);
+                return true;
             }
         }
+        return false;
     }
 }

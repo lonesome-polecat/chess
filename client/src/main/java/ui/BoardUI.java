@@ -17,8 +17,8 @@ public class BoardUI {
     private static final String BORDER_BG_COLOR = SET_BG_COLOR_DARK_GREY;
 
     private static final String BORDER_TEXT_COLOR = SET_TEXT_COLOR_LIGHT_GREY;
-    private static final String WHITE_TEAM_COLOR = SET_TEXT_COLOR_WHITE;
-    private static final String BLACK_TEAM_COLOR = SET_TEXT_COLOR_BLACK;
+    private static final String WHITE_TEAM_COLOR = SET_TEXT_COLOR_BLACK;
+    private static final String BLACK_TEAM_COLOR = SET_TEXT_COLOR_WHITE;
 
     private static final String[] ROW_NUMBERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
     private static final String[] COL_LETTERS = {"h", "g", "f", "e", "d", "c", "b", "a"};
