@@ -50,15 +50,17 @@ public class ChessClient {
                     - signIn <username> <password>
                     - register <username> <password> <email>
                     - quit
+                    - help
                     """;
         }
         return """
-                - newGame <gameName>
+                - createGame <gameName>
                 - listGames
                 - playGame <gameID> <teamColor>
                 - observeGame <gameID>
                 - signOut
                 - quit
+                - help
                 """;
     }
 
