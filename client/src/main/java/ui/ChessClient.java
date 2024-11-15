@@ -157,13 +157,13 @@ public class ChessClient {
             throw new ResponseException(401, "You must first sign in");
         }
         if (params.length != 2) {
-            throw new ResponseException(400, "You must enter a gameID and team color to join");
+            throw new ResponseException(400, "You must enter which game number and team color to play as");
         }
         var gameID = params[0];
         var playerColor = params[1].toUpperCase();
         // Make sure playerColor is correct string
         if (!playerColor.equals("BLACK") && !playerColor.equals("WHITE")) {
-            return "Must specify color to join as: BLACK or WHITE";
+            return "Must specify color to play as: BLACK or WHITE";
         }
 
         var joinGameRequest = new JoinGameRequest(gameID, playerColor);
@@ -171,11 +171,11 @@ public class ChessClient {
             server.joinGame(joinGameRequest);
             var result = displayGame(gameID, playerColor);
             if (!result) {
-                return "Error: unable to join game";
+                return "Error: unable to play game";
             }
             return String.format("You joined a game as %s team", playerColor);
         } catch (ResponseException e) {
-            return "Error: unable to join game";
+            return "Error: unable to play game";
         }
     }
 
