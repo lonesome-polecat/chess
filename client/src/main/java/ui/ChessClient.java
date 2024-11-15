@@ -129,7 +129,7 @@ public class ChessClient {
         var newGame = new GameData(0, null, null, gameName, null);
         try {
             NewGameResponse response = server.createGame(newGame);
-            return String.format("You created a new game with the gameID: %d", response.gameID());
+            return "You created a new game!";
         } catch (ResponseException e) {
             return "Error: unable to create new game";
         }
@@ -211,7 +211,8 @@ public class ChessClient {
 
         String gameList = "";
         for (var game : allGames.games()) {
-            var str = String.format("%s: %s (BLACK: %s, WHITE: %s)\n", game.gameID(), game.gameName(), game.blackUsername(), game.whiteUsername());
+            var playersStr = String.format("(TEAM BLACK: %s, TEAM WHITE: %s)", game.blackUsername(), game.whiteUsername());
+            var str = String.format("%s: %s %s", game.gameID(), game.gameName(), playersStr);
             gameList = gameList.concat(str);
         }
         return gameList;
