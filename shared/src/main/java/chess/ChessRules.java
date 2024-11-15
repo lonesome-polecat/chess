@@ -67,12 +67,7 @@ public class ChessRules {
             return validMoves;
         }
         if (rules.charAt(3) == 'p') {
-            ChessGame.TeamColor pieceColor = board.getPiece(startPos).getTeamColor();
-            if (pieceColor == ChessGame.TeamColor.WHITE) {
-                getWhitePawnMoves(validMoves, board, startPos);
-            } else if (pieceColor == ChessGame.TeamColor.BLACK) {
-                getBlackPawnMoves(validMoves, board, startPos);
-            }
+            getPawnMoves(validMoves, board, startPos);
             return validMoves;
         }
         if (rules.charAt(3) == 'n') {
@@ -182,15 +177,24 @@ public class ChessRules {
         }
     }
 
-    public void getWhitePawnMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
+    public void getPawnMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
 
         int row = startPos.getRow();
         int col = startPos.getColumn();
         var color = board.getPiece(startPos).getTeamColor();
+        int farSide;
+        int homeRow;
+        if (color == ChessGame.TeamColor.WHITE) {
+            farSide = 8;
+            homeRow = 1;
+        } else {
+            farSide = 1;
+            homeRow = 8;
+        }
         var attackVectors =  new HashSet<ChessPosition>();
 
         var promotionPieces = new ArrayList<ChessPiece.PieceType>();
-        if (row + 1 == 8) {
+        if (getDifference(row, 1, color) == farSide) {
             promotionPieces.add(ChessPiece.PieceType.QUEEN);
             promotionPieces.add(ChessPiece.PieceType.BISHOP);
             promotionPieces.add(ChessPiece.PieceType.ROOK);
@@ -200,14 +204,14 @@ public class ChessRules {
         }
         // check forward and forward-diagonals one space
         // first check move forward (1 or 2 spaces)
-        var possiblePos = new ChessPosition(row+1, col);
+        var possiblePos = new ChessPosition(getDifference(row, 1, color), col);
         ChessPiece pieceOnSquare = board.getPiece(possiblePos);
         if (pieceOnSquare == null) {
             for (var promotionPiece : promotionPieces) {
                 validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
             }
-            if (row == 2) {
-                possiblePos = new ChessPosition(row+2, col);
+            if (row == getDifference(homeRow, 1, color)) {
+                possiblePos = new ChessPosition(getDifference(row, 2, color), col);
                 pieceOnSquare = board.getPiece(possiblePos);
                 if (pieceOnSquare == null) {
                     for (var promotionPiece : promotionPieces) {
@@ -218,7 +222,7 @@ public class ChessRules {
         }
         // then check left-diagonal attack
         if (col > 1) {
-            possiblePos = new ChessPosition(row+1, col-1);
+            possiblePos = new ChessPosition(getDifference(row, 1, color), col-1);
             pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare != null) {
                 // Only add possible move if the piece on square is an enemy piece
@@ -234,7 +238,7 @@ public class ChessRules {
         }
         // then check right-diagonal
         if (col < 8) {
-            possiblePos = new ChessPosition(row+1, col+1);
+            possiblePos = new ChessPosition(getDifference(row, 1, color), col+1);
             pieceOnSquare = board.getPiece(possiblePos);
             if (pieceOnSquare != null) {
                 // Only add possible move if the piece on square is an enemy piece
@@ -251,73 +255,12 @@ public class ChessRules {
         teamAttackVectors.get(color).addAll(attackVectors);
     }
 
-    public void getBlackPawnMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
-
-        int row = startPos.getRow();
-        int col = startPos.getColumn();
-        var color = board.getPiece(startPos).getTeamColor();
-        var attackVectors =  new HashSet<ChessPosition>();
-
-        var promotionPieces = new ArrayList<ChessPiece.PieceType>();
-        if (row - 1 == 1) {
-            promotionPieces.add(ChessPiece.PieceType.QUEEN);
-            promotionPieces.add(ChessPiece.PieceType.BISHOP);
-            promotionPieces.add(ChessPiece.PieceType.ROOK);
-            promotionPieces.add(ChessPiece.PieceType.KNIGHT);
+    public int getDifference(int row, int offset, ChessGame.TeamColor color) {
+        if (color == ChessGame.TeamColor.WHITE) {
+            return row + offset;
         } else {
-            promotionPieces.add(null);
+            return row - offset;
         }
-        // check forward and forward-diagonals one space
-        // first check move forward (1 or 2 spaces)
-        var possiblePos = new ChessPosition(row-1, col);
-        ChessPiece pieceOnSquare = board.getPiece(possiblePos);
-        if (pieceOnSquare == null) {
-            for (var promotionPiece : promotionPieces) {
-                validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
-            }
-            if (row == 7) {
-                possiblePos = new ChessPosition(row-2, col);
-                pieceOnSquare = board.getPiece(possiblePos);
-                if (pieceOnSquare == null) {
-                    for (var promotionPiece : promotionPieces) {
-                        validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
-                    }
-                }
-            }
-        }
-        // then check left-diagonal attack
-        if (col > 1) {
-            possiblePos = new ChessPosition(row-1, col-1);
-            pieceOnSquare = board.getPiece(possiblePos);
-            if (pieceOnSquare != null) {
-                // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != color) {
-                    for (var promotionPiece : promotionPieces) {
-                        validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
-                    }
-                    attackVectors.add(possiblePos);
-                } else {
-                    attackVectors.add(possiblePos);
-                }
-            }
-        }
-        // then check right-diagonal
-        if (col < 8) {
-            possiblePos = new ChessPosition(row-1, col+1);
-            pieceOnSquare = board.getPiece(possiblePos);
-            if (pieceOnSquare != null) {
-                // Only add possible move if the piece on square is an enemy piece
-                if (pieceOnSquare.getTeamColor() != color) {
-                    for (var promotionPiece : promotionPieces) {
-                        validMoves.add(new ChessMove(startPos, possiblePos, promotionPiece));
-                    }
-                    attackVectors.add(possiblePos);
-                } else {
-                    attackVectors.add(possiblePos);
-                }
-            }
-        }
-        teamAttackVectors.get(color).addAll(attackVectors);
     }
 
     public void getForwardBackMoves(ArrayList<ChessMove> validMoves, ChessBoard board, ChessPosition startPos) {
