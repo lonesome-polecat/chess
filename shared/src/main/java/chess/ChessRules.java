@@ -444,9 +444,9 @@ public class ChessRules {
         return teamAttackVectors.get(enemyColor).contains(kingPosition);
     }
 
-    public boolean setValidMoves(int row, int col, ArrayList<ChessMove> validMoves, ChessGame.TeamColor color, ChessBoard board, ChessPosition start) {
+    public boolean setValidMoves(int row, int col, ArrayList<ChessMove> validMoves, ChessGame.TeamColor color, ChessBoard brd, ChessPosition start) {
         var possiblePos = new ChessPosition(row, col);
-        ChessPiece pieceOnSquare = board.getPiece(possiblePos);
+        ChessPiece pieceOnSquare = brd.getPiece(possiblePos);
         if (pieceOnSquare == null) {
             validMoves.add(new ChessMove(start, possiblePos, null));
             teamAttackVectors.get(color).add(possiblePos);

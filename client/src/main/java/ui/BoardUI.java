@@ -11,7 +11,7 @@ import static ui.EscapeSequences.*;
 
 public class BoardUI {
 
-    private static final PrintStream out = System.out;
+    private static final PrintStream OUT = System.out;
     private static final String LIGHT_BG_COLOR = SET_BG_COLOR_ORANGE;
     private static final String DARK_BG_COLOR = SET_BG_COLOR_DARK_GREEN;
     private static final String BORDER_BG_COLOR = SET_BG_COLOR_DARK_GREY;
@@ -50,34 +50,34 @@ public class BoardUI {
                 printPiece(i, j, teamColor, board);
             }
             printSideBorder(i, teamColor);
-            out.println(RESET_BG_COLOR);
+            OUT.println(RESET_BG_COLOR);
         }
-        out.println(RESET_BG_COLOR);
+        OUT.println(RESET_BG_COLOR);
     }
 
     private static void printHeaders(ChessGame.TeamColor teamColor) {
-        out.print(BORDER_BG_COLOR + BORDER_TEXT_COLOR);
-        out.print("   ");
+        OUT.print(BORDER_BG_COLOR + BORDER_TEXT_COLOR);
+        OUT.print("   ");
         if (teamColor == ChessGame.TeamColor.WHITE) {
             for (int i = 0; i < COL_LETTERS.length; i++) {
-                out.printf(" %s ", COL_LETTERS[i]);
+                OUT.printf(" %s ", COL_LETTERS[i]);
             }
         } else {
             for (int i = COL_LETTERS.length-1; i >= 0; i--) {
-                out.printf(" %s ", COL_LETTERS[i]);
+                OUT.printf(" %s ", COL_LETTERS[i]);
             }
         }
-        out.print("   ");
-        out.println(RESET_BG_COLOR + RESET_TEXT_COLOR);
+        OUT.print("   ");
+        OUT.println(RESET_BG_COLOR + RESET_TEXT_COLOR);
     }
 
     private static void printSideBorder(int index, ChessGame.TeamColor teamColor) {
         // Index will come in as 2-9, need to adjust for that
-        out.print(BORDER_BG_COLOR + BORDER_TEXT_COLOR);
+        OUT.print(BORDER_BG_COLOR + BORDER_TEXT_COLOR);
         if (teamColor == ChessGame.TeamColor.WHITE) {
-            out.printf(" %s ", ROW_NUMBERS[index-2]);
+            OUT.printf(" %s ", ROW_NUMBERS[index-2]);
         } else {
-            out.printf(" %s ", ROW_NUMBERS[9-index]);
+            OUT.printf(" %s ", ROW_NUMBERS[9-index]);
         }
     }
 
@@ -96,13 +96,13 @@ public class BoardUI {
         if (piece != null) {
             var pieceTeamColor = piece.getTeamColor();
             if (pieceTeamColor == ChessGame.TeamColor.WHITE) {
-                out.print(WHITE_TEAM_COLOR);
+                OUT.print(WHITE_TEAM_COLOR);
             } else {
-                out.print(BLACK_TEAM_COLOR);
+                OUT.print(BLACK_TEAM_COLOR);
             }
             icon = getIconFromPieceType(piece.getPieceType());
         }
-        out.printf(" %s ", icon);
+        OUT.printf(" %s ", icon);
     }
 
     private static TileColor switchTileColor(TileColor tileColor) {
@@ -116,9 +116,9 @@ public class BoardUI {
 
     private static void setTileColor(TileColor tileColor) {
         if (tileColor == TileColor.WHITE) {
-            out.printf(LIGHT_BG_COLOR);
+            OUT.printf(LIGHT_BG_COLOR);
         } else if (tileColor == TileColor.BLACK) {
-            out.printf(DARK_BG_COLOR);
+            OUT.printf(DARK_BG_COLOR);
         }
     }
 
