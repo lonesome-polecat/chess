@@ -31,7 +31,7 @@ public class ChessClient {
             return switch (cmd) {
                 case "signin" -> signIn(params);
                 case "register" -> register(params);
-                case "newgame" -> createGame(params);
+                case "creategame" -> createGame(params);
                 case "listgames" -> listGames();
                 case "playgame" -> joinGame(params);
                 case "observegame" -> observeGame(params);
@@ -212,7 +212,7 @@ public class ChessClient {
         String gameList = "";
         for (var game : allGames.games()) {
             var playersStr = String.format("(TEAM BLACK: %s, TEAM WHITE: %s)", game.blackUsername(), game.whiteUsername());
-            var str = String.format("%s: %s %s", game.gameID(), game.gameName(), playersStr);
+            var str = String.format("%s: %s %s\n", game.gameID(), game.gameName(), playersStr);
             gameList = gameList.concat(str);
         }
         return gameList;
