@@ -12,10 +12,13 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 
+import ui.WSClient;
+
 public class ServerFacade {
 
     private final String serverUrl;
     private String authToken = "";
+    private WSClient WSSession;
 
     public ServerFacade(String url) {
         serverUrl = url;
@@ -47,6 +50,12 @@ public class ServerFacade {
     public void joinGame(JoinGameRequest joinGameRequest) throws ResponseException {
         var path = "/game";
         makeRequest("PUT", path, joinGameRequest, Object.class);
+        try {
+            WSSession = new WSClient(this, serverUrl);
+        } catch (Exception e) {
+            System.out.printf("Error connecting to websocket: %s%n", e);
+            throw new ResponseException(500, "ERROR");
+        }
     }
 
     public ListGamesResponse listGames() throws ResponseException {

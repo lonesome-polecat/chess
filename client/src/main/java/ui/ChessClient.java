@@ -169,6 +169,7 @@ public class ChessClient {
         var joinGameRequest = new JoinGameRequest(gameID, playerColor);
         try {
             server.joinGame(joinGameRequest);
+            // Enter gameplay state
             var result = displayGame(gameID, playerColor);
             if (!result) {
                 return "Error: unable to play game";
