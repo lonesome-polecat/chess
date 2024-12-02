@@ -14,7 +14,8 @@ public class ChessClient {
 
     private enum State {
             SIGNED_IN,
-            SIGNED_OUT
+            SIGNED_OUT,
+            GAMEPLAY
     }
 
     public ChessClient(String serverUrl) {
@@ -45,15 +46,8 @@ public class ChessClient {
     }
 
     public String help() {
-        if (state == State.SIGNED_OUT) {
+        if (state == State.SIGNED_IN) {
             return """
-                    - signIn <username> <password>
-                    - register <username> <password> <email>
-                    - quit
-                    - help
-                    """;
-        }
-        return """
                 - createGame <gameName>
                 - listGames
                 - playGame <game #> <teamColor>
@@ -62,9 +56,29 @@ public class ChessClient {
                 - quit
                 - help
                 """;
+        } else if (state == State.GAMEPLAY) {
+            return """
+                    - drawBoard
+                    - highlightMoves
+                    - makeMove
+                    - leave
+                    - resign
+                    - help
+                    """;
+        } else {
+            return """
+                    - signIn <username> <password>
+                    - register <username> <password> <email>
+                    - quit
+                    - help
+                    """;
+        }
     }
 
     public String register(String[] params) throws ResponseException {
+        if (state != State.SIGNED_OUT) {
+            throw new ResponseException(400, "You are already signed in");
+        }
         for (var param : params) {
             System.out.println(param);
         }
@@ -88,6 +102,9 @@ public class ChessClient {
     }
 
     public String signIn(String[] params) throws ResponseException {
+        if (state != State.SIGNED_OUT) {
+            throw new ResponseException(400, "You are already signed in");
+        }
         for (var param : params) {
             System.out.println(param);
         }
@@ -107,6 +124,11 @@ public class ChessClient {
     }
 
     public String signOut() throws ResponseException {
+        if (state == State.GAMEPLAY) {
+            throw new ResponseException(400, "You must first leave the game");
+        } else if (state == State.SIGNED_OUT) {
+            throw new ResponseException(400, "You are already signed out");
+        }
         try {
             server.logoutUser();
         } catch (ResponseException e) {
@@ -119,7 +141,7 @@ public class ChessClient {
     public String createGame(String[] params) throws ResponseException {
         // make sure user is signIn
         // create game and return gameID
-        if (state == State.SIGNED_OUT) {
+        if (state != State.SIGNED_IN) {
             throw new ResponseException(401, "You must first sign in");
         }
         if (params.length != 1) {
@@ -138,7 +160,7 @@ public class ChessClient {
     public String listGames() throws ResponseException {
         // make sure user is signIn
         // list all existing games
-        if (state == State.SIGNED_OUT) {
+        if (state != State.SIGNED_IN) {
             throw new ResponseException(401, "You must first sign in");
         }
         try {
@@ -153,7 +175,7 @@ public class ChessClient {
     public String joinGame(String[] params) throws ResponseException {
         // make sure user is signIn
         // return a list of all existing games
-        if (state == State.SIGNED_OUT) {
+        if (state != State.SIGNED_IN) {
             throw new ResponseException(401, "You must first sign in");
         }
         if (params.length != 2) {
@@ -174,6 +196,7 @@ public class ChessClient {
             if (!result) {
                 return "Error: unable to play game";
             }
+            state = State.GAMEPLAY;
             return String.format("You joined a game as %s team", playerColor);
         } catch (ResponseException e) {
             return "Error: unable to play game";
@@ -183,7 +206,7 @@ public class ChessClient {
     public String observeGame(String[] params) throws ResponseException {
         // make sure user is signIn
         // return a list of all existing games
-        if (state == State.SIGNED_OUT) {
+        if (state != State.SIGNED_IN) {
             throw new ResponseException(401, "You must first sign in");
         }
         if (params.length != 1) {
