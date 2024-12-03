@@ -27,7 +27,7 @@ public class ServerFacadeTests {
 
     @BeforeEach
     public void clearDB() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         try {
             serverFacade.clearDB();
         } catch (ResponseException e) {
@@ -48,21 +48,21 @@ public class ServerFacadeTests {
 
     @Test
     public void registerUserTestInvalidUsername() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("", "", null);
         Assertions.assertThrows(ResponseException.class, () -> serverFacade.registerUser(registerRequest));
     }
 
     @Test
     public void registerUserTestValidRequest() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest));
     }
 
     @Test
     public void loginUserTestInvalidPassword() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
 
@@ -72,7 +72,7 @@ public class ServerFacadeTests {
 
     @Test
     public void loginUserTestValidRequest() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
 
@@ -82,7 +82,7 @@ public class ServerFacadeTests {
 
     @Test
     public void logoutUserTestInvalidToken() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
         // Logout user with current authToken
@@ -94,7 +94,7 @@ public class ServerFacadeTests {
 
     @Test
     public void logoutUserTestValidToken() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
         // Logout user with current authToken
@@ -103,7 +103,7 @@ public class ServerFacadeTests {
 
     @Test
     public void createGameTestInvalidGameName() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
 
@@ -113,7 +113,7 @@ public class ServerFacadeTests {
 
     @Test
     public void createGameTestValidRequest() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
 
@@ -124,7 +124,7 @@ public class ServerFacadeTests {
 
     @Test
     public void joinGameTestInvalidGameId() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
 
@@ -138,7 +138,7 @@ public class ServerFacadeTests {
 
     @Test
     public void joinGameTestValidRequest() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
 
@@ -152,7 +152,7 @@ public class ServerFacadeTests {
 
     @Test
     public void listGamesTestInvalidToken() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
 
@@ -172,7 +172,7 @@ public class ServerFacadeTests {
 
     @Test
     public void listGamesTestValidRequest() {
-        var serverFacade = new ServerFacade(String.format("http://localhost:%d", port));
+        var serverFacade = new ServerFacade(null, String.format("localhost:%d", port));
         UserData registerRequest = new UserData("player1", "player1", null);
         Assertions.assertDoesNotThrow(() -> serverFacade.registerUser(registerRequest), "");
 

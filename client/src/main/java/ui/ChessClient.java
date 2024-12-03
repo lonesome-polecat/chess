@@ -20,7 +20,7 @@ public class ChessClient {
 
     public ChessClient(String serverUrl) {
         this.serverUrl = serverUrl;
-        this.server = new ServerFacade(serverUrl);
+        this.server = new ServerFacade(this, serverUrl);
         this.state = State.SIGNED_OUT;
     }
 
@@ -36,6 +36,8 @@ public class ChessClient {
                 case "listgames" -> listGames();
                 case "playgame" -> joinGame(params);
                 case "observegame" -> observeGame(params);
+                case "leave" -> leaveGame();
+                case "makemove" -> makeMove();
                 case "signout" -> signOut();
                 case "quit" -> "quit";
                 default -> help();
@@ -219,6 +221,26 @@ public class ChessClient {
             return "Error: invalid game number";
         }
         return "You joined a game as an observer";
+    }
+
+    public String makeMove() throws ResponseException {
+        if (state != State.GAMEPLAY) {
+            throw new ResponseException(400, "You must first join a game");
+        }
+        server.makeMove();
+        return "You made a move";
+    }
+
+    public String leaveGame() throws ResponseException {
+        if (state != State.GAMEPLAY) {
+            throw new ResponseException(400, "You must first join a game");
+        }
+        state = State.SIGNED_IN;
+        return "You left the game";
+    }
+
+    public void onMessage(String msg) {
+        System.out.printf("Incoming msg: %s%n", msg);
     }
 
     private void initGamesList() throws ResponseException {
