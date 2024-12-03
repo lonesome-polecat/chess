@@ -24,7 +24,7 @@ public class ServerFacade {
 
     public ServerFacade(ChessClient client, String url) {
         serverHTTPUrl = "http://" + url + "8080";
-        serverWSUrl = "ws://" + url + "8081/ws";
+        serverWSUrl = "ws://" + url + "8080/ws";
         this.client = client;
     }
 

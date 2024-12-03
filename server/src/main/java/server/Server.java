@@ -2,6 +2,9 @@ package server;
 
 import dataaccess.MySqlDataAccess;
 import model.*;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.*;
 import spark.*;
 import com.google.gson.Gson;
@@ -29,6 +32,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
+        Spark.webSocket("/ws", WSHandler.class);
         Spark.post("/user", this::registerUser);
         Spark.post("/session", this::loginUser);
         Spark.delete("/session", this::logoutUser);
@@ -90,6 +94,15 @@ public class Server {
     private Object clearDB(Request request, Response response) {
         authService.clearDB();
         return "{}";
+    }
+
+    @WebSocket
+    public static class WSHandler {
+
+        @OnWebSocketMessage
+        public void onMessage(Session session, String message) throws Exception {
+            session.getRemote().sendString("WebSocket response: " + message);
+        }
     }
 
     public void stop() {
