@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import model.*;
 import model.ResponseException;
 
@@ -37,7 +38,7 @@ public class ChessClient {
                 case "playgame" -> joinGame(params);
                 case "observegame" -> observeGame(params);
                 case "leave" -> leaveGame();
-                case "makemove" -> makeMove();
+                case "makemove" -> makeMove(params);
                 case "signout" -> signOut();
                 case "quit" -> "quit";
                 default -> help();
@@ -223,11 +224,14 @@ public class ChessClient {
         return "You joined a game as an observer";
     }
 
-    public String makeMove() throws ResponseException {
+    public String makeMove(String[] params) throws ResponseException {
         if (state != State.GAMEPLAY) {
             throw new ResponseException(400, "You must first join a game");
         }
-        server.makeMove();
+        if (params.length != 1) {
+            throw new ResponseException(400, "You must enter a move like this: a2a3");
+        }
+        server.makeMove(params[0]);
         return "You made a move";
     }
 
@@ -235,6 +239,17 @@ public class ChessClient {
         if (state != State.GAMEPLAY) {
             throw new ResponseException(400, "You must first join a game");
         }
+        server.leaveGame();
+        state = State.SIGNED_IN;
+        return "You left the game";
+    }
+
+    public String resignGame() throws ResponseException {
+        if (state != State.GAMEPLAY) {
+            throw new ResponseException(400, "You must first join a game");
+        }
+        // Add a "are you sure?" prompt
+        server.resignGame();
         state = State.SIGNED_IN;
         return "You left the game";
     }
