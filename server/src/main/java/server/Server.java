@@ -109,13 +109,27 @@ public class Server {
     @WebSocket
     public static class WSHandler {
         // ConcurrentHashMap to store WebSocket connections
-        private static final ConcurrentHashMap<String, List<Session>> sessionMap = new ConcurrentHashMap<>();
+        private static final ConcurrentHashMap<Integer, List<Session>> sessionMap = new ConcurrentHashMap<>();
 
         @OnWebSocketMessage
         public void onMessage(Session session, String message) throws Exception {
             var userCommand = new Gson().fromJson(message, UserGameCommand.class);
+            var gameID = userCommand.getGameID();
 
             System.out.printf("%nReceived request to join game #%d", userCommand.getGameID());
+
+            if (userCommand.getCommandType() == UserGameCommand.CommandType.CONNECT) {
+                var sessions = sessionMap.get(gameID);
+                sessions.add(session);
+                sessionMap.put(gameID, sessions);
+            }
+            if (userCommand.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
+            }
+            if (userCommand.getCommandType() == UserGameCommand.CommandType.LEAVE) {
+            }
+            if (userCommand.getCommandType() == UserGameCommand.CommandType.RESIGN) {
+            }
+
             session.getRemote().sendString("WebSocket response: " + message);
 
             // Broadcast message to all sessions in the group
