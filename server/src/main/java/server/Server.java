@@ -114,12 +114,6 @@ public class Server {
         private static final ConcurrentHashMap<Integer, List<Session>> sessionMap = new ConcurrentHashMap<>();
         private static final ConcurrentHashMap<Integer, GameData> gameDataMap = new ConcurrentHashMap<>();
 
-        private enum UserType {
-            BLACK,
-            WHITE,
-            OBSERVER
-        }
-
         @OnWebSocketMessage
         public void onMessage(Session session, String message) throws Exception {
             var userCommand = new Gson().fromJson(message, UserGameCommand.class);
@@ -165,18 +159,26 @@ public class Server {
             }
 
             if (userCommand.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
-                UserType userType;
+                ChessGame.TeamColor playerColor;
 
                 // Check if game is active
                 GameData gameData = gameDataMap.get(gameID);
 
                 // Check if user is a player or observer
                 if (Objects.equals(username, gameData.whiteUsername())) {
-                    userType = UserType.WHITE;
+                    playerColor = ChessGame.TeamColor.WHITE;
                 } else if (Objects.equals(username, gameData.blackUsername())) {
-                    userType = UserType.BLACK;
+                    playerColor = ChessGame.TeamColor.BLACK;
                 } else {
-                    userType = UserType.OBSERVER;
+                    // user is not a player
+                    throw new ResponseException(401, "Error: user is not a player in game");
+                }
+
+                // Deserialize the game and check if it is the player's turn
+                ChessGame game = gameData.game();
+                var currTurn = game.getTeamTurn();
+                if (currTurn != playerColor) {
+                    throw new ResponseException(401, "Error: it is not the user's turn");
                 }
 
                 // double check that they sent an actual move
@@ -185,10 +187,10 @@ public class Server {
                 }
 
                 // Get startPosition and endPosition in list
+                // TODO: the following code is incomplete and needs to parse promotion piece
                 ChessPosition[] positions = parseMove(userCommand.getMove());
 
-                // deserialize game and check valid moves
-                ChessGame game = gameData.game();
+                // Check that player's move is valid
                 var validMoves = game.validMoves(positions[0]);
 
                 boolean isValid = false;
@@ -206,6 +208,24 @@ public class Server {
                 }
 
                 game.makeMove(officialMove);
+
+                // Check to see if opponent in check or checkmate or stalemate
+                ChessGame.TeamColor opponentColor = switch (playerColor) {
+                    case BLACK -> ChessGame.TeamColor.WHITE;
+                    case WHITE -> ChessGame.TeamColor.BLACK;
+                };
+                game.setTeamTurn(opponentColor);
+                if (game.isInCheck(opponentColor)) {
+                    if (game.isInCheckmate(opponentColor)) {
+                        // user won! prep notification
+
+                    } else {
+                        // opponent in check, prep notification
+                    }
+                }
+                if (game.isInStalemate(opponentColor)) {
+                    // It's a tie! prep notification
+                }
 
                 var sessions = sessionMap.get(gameID);
             }
