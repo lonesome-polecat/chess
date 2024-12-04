@@ -1,6 +1,8 @@
 package ui;
 
+import com.google.gson.Gson;
 import server.Server;
+import websocket.commands.UserGameCommand;
 
 import javax.websocket.*;
 import java.net.URI;
@@ -21,7 +23,8 @@ public class WSClient extends Endpoint {
         });
     }
 
-    public void sendUserGameCommand(String msg) throws Exception {
+    public void sendUserGameCommand(UserGameCommand command) throws Exception {
+        var msg = new Gson().toJson(command);
         this.session.getBasicRemote().sendText(msg);
     }
 

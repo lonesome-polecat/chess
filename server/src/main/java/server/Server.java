@@ -3,11 +3,19 @@ package server;
 import dataaccess.MySqlDataAccess;
 import model.*;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.*;
 import spark.*;
 import com.google.gson.Gson;
+import websocket.commands.UserGameCommand;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server {
 
@@ -17,6 +25,8 @@ public class Server {
 
     private final AuthService authService = new AuthService(authDAO, userDAO, gameDAO);
     private final GameService gameService = new GameService(gameDAO);
+
+    private static HashMap<String, WSHandler[]> wsConnections;
 
     public int run(int desiredPort) {
         // Initialize database
@@ -32,7 +42,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.webSocket("/ws", WSHandler.class);
+        Spark.webSocket("/ws/*", WSHandler.class);
         Spark.post("/user", this::registerUser);
         Spark.post("/session", this::loginUser);
         Spark.delete("/session", this::logoutUser);
@@ -98,10 +108,58 @@ public class Server {
 
     @WebSocket
     public static class WSHandler {
+        // ConcurrentHashMap to store WebSocket connections
+        private static final ConcurrentHashMap<String, List<Session>> sessionMap = new ConcurrentHashMap<>();
 
         @OnWebSocketMessage
         public void onMessage(Session session, String message) throws Exception {
+            var userCommand = new Gson().fromJson(message, UserGameCommand.class);
+
+            System.out.printf("%nReceived request to join game #%d", userCommand.getGameID());
             session.getRemote().sendString("WebSocket response: " + message);
+
+            // Broadcast message to all sessions in the group
+            // broadcastMessage(sessionId, message);
+        }
+
+        // On close, remove the session from the group
+        @OnWebSocketClose
+        public void onClose(Session session, int statusCode, String reason) {
+            String sessionId = getSessionIdFromPath(session.getUpgradeRequest().getRequestURI().getPath());
+
+            // Remove the session
+            List<Session> sessions = sessionMap.get(sessionId);
+            if (sessions != null) {
+                sessions.remove(session);
+                System.out.println("Disconnected: " + sessionId + " | Remaining connections: " + sessions.size());
+
+                if (sessions.isEmpty()) {
+                    sessionMap.remove(sessionId); // Clean up if no connections remain
+                }
+            }
+        }
+
+        // Helper to extract session ID from WebSocket path
+        private String getSessionIdFromPath(String path) {
+            // Assuming the path format is /ws/<session_id>
+            return path.substring(path.lastIndexOf('/') + 1);
+        }
+
+        // Helper to broadcast messages to a group
+        private void broadcastMessage(String sessionId, String message) {
+            List<Session> sessions = sessionMap.get(sessionId);
+
+            if (sessions != null) {
+                sessions.forEach(s -> {
+                    try {
+                        if (s.isOpen()) {
+                            s.getRemote().sendString(message); // Send the message
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
         }
     }
 

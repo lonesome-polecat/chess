@@ -10,7 +10,7 @@ public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
     private State state;
-    private ListGamesResponse allGames = null;
+    public ListGamesResponse allGames = null;
 
     private enum State {
             SIGNED_IN,

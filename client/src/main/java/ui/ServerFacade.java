@@ -3,6 +3,7 @@ package ui;
 import com.google.gson.Gson;
 import model.*;
 import model.ResponseException;
+import websocket.commands.UserGameCommand;
 
 import javax.websocket.ContainerProvider;
 import javax.websocket.WebSocketContainer;
@@ -21,6 +22,7 @@ public class ServerFacade {
     private String authToken = "";
     private WSClient WSSession;
     private final ChessClient client;
+    private String connectedGameId;
 
     public ServerFacade(ChessClient client, String url) {
         serverHTTPUrl = "http://" + url + "8080";
@@ -55,7 +57,9 @@ public class ServerFacade {
         var path = "/game";
         makeRequest("PUT", path, joinGameRequest, Object.class);
         try {
-            WSSession = new WSClient(client, serverWSUrl);
+            WSSession = new WSClient(client, String.format("%s", serverWSUrl));
+            connectedGameId = joinGameRequest.gameID();
+            connect();
         } catch (Exception e) {
             System.out.printf("Error connecting to websocket: %s%n", e);
             throw new ResponseException(500, "ERROR");
@@ -74,13 +78,20 @@ public class ServerFacade {
 
     // WS methods
     public void connect() {
-
+        // String msg = "This is my first message from my client";
+        var command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, Integer.parseInt(connectedGameId));
+        try {
+            WSSession.sendUserGameCommand(command);
+        } catch (Exception e) {
+            System.out.printf("Unable to send WS command: %s%n", e);
+        }
     }
 
     public void makeMove() {
-        String msg = "This is my first message from my client";
+        // String msg = "This is my first message from my client";
+        var command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, Integer.parseInt(connectedGameId));
         try {
-            WSSession.sendUserGameCommand(msg);
+            WSSession.sendUserGameCommand(command);
         } catch (Exception e) {
             System.out.printf("Unable to send WS command: %s%n", e);
         }
