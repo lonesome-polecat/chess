@@ -24,7 +24,7 @@ public class WSClient extends Endpoint {
     }
 
     public void sendUserGameCommand(UserGameCommand command) throws Exception {
-        var msg = new Gson().toJson(command);
+        String msg = new Gson().toJson(command);
         this.session.getBasicRemote().sendText(msg);
     }
 

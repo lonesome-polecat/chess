@@ -11,8 +11,10 @@ import service.*;
 import spark.*;
 import com.google.gson.Gson;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -120,20 +122,50 @@ public class Server {
 
             if (userCommand.getCommandType() == UserGameCommand.CommandType.CONNECT) {
                 var sessions = sessionMap.get(gameID);
+                if (sessions == null) {
+                    sessions = new LinkedList<Session>();
+                }
                 sessions.add(session);
                 sessionMap.put(gameID, sessions);
+
+                String msg = "Somebody joined this game";
+                var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+                session.getRemote().sendString("WebSocket response: " + message + "\r\n");
             }
             if (userCommand.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
+                var sessions = sessionMap.get(gameID);
             }
             if (userCommand.getCommandType() == UserGameCommand.CommandType.LEAVE) {
             }
             if (userCommand.getCommandType() == UserGameCommand.CommandType.RESIGN) {
             }
 
-            session.getRemote().sendString("WebSocket response: " + message);
-
+//            if (session.isOpen()) {
+//                session.getRemote().sendString("WebSocket response: " + message + "\r\n");
+//            }
+//
             // Broadcast message to all sessions in the group
             // broadcastMessage(sessionId, message);
+        }
+
+        @OnWebSocketError
+        public void onError(Session session, Throwable error) {
+            String sessionId = "unknown";
+            if (session != null) {
+                String path = session.getUpgradeRequest().getRequestURI().getPath();
+                sessionId = getSessionIdFromPath(path);
+            }
+            System.err.println("Error in session " + sessionId + ": " + error.getMessage());
+            error.printStackTrace();
+
+            // Optionally notify the client
+            if (session != null && session.isOpen()) {
+                try {
+                    session.getRemote().sendString("An error occurred: " + error.getMessage());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         // On close, remove the session from the group

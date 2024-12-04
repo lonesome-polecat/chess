@@ -240,6 +240,7 @@ public class ChessClient {
     }
 
     public void onMessage(String msg) {
+        System.out.flush();
         System.out.printf("Incoming msg: %s%n", msg);
     }
 
