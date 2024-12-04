@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -112,6 +113,8 @@ public class Server {
     public static class WSHandler {
         // ConcurrentHashMap to store WebSocket connections
         private static final ConcurrentHashMap<Integer, List<Session>> sessionMap = new ConcurrentHashMap<>();
+        private static final ConcurrentHashMap<Integer, GameData> gameDataMap = new ConcurrentHashMap<>();
+
 
         @OnWebSocketMessage
         public void onMessage(Session session, String message) throws Exception {
@@ -121,17 +124,25 @@ public class Server {
             System.out.printf("%nReceived request to join game #%d", userCommand.getGameID());
 
             if (userCommand.getCommandType() == UserGameCommand.CommandType.CONNECT) {
+                // Check if there are existing connections to that game
                 var sessions = sessionMap.get(gameID);
                 if (sessions == null) {
                     sessions = new LinkedList<Session>();
                 }
+                // Add new connection to game
                 sessions.add(session);
                 sessionMap.put(gameID, sessions);
+
+                // Check if game is active
+                boolean gameExists = gameDataMap.containsKey(gameID);
+                if (!gameExists) {
+                }
 
                 String msg = "Somebody joined this game";
                 var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                 session.getRemote().sendString("WebSocket response: " + message + "\r\n");
             }
+
             if (userCommand.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
                 var sessions = sessionMap.get(gameID);
             }
