@@ -1,5 +1,6 @@
 package server;
 
+import chess.*;
 import dataaccess.MySqlDataAccess;
 import model.*;
 import org.eclipse.jetty.websocket.api.Session;
@@ -13,12 +14,10 @@ import com.google.gson.Gson;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
-import java.sql.Connection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server {
 
@@ -115,6 +114,11 @@ public class Server {
         private static final ConcurrentHashMap<Integer, List<Session>> sessionMap = new ConcurrentHashMap<>();
         private static final ConcurrentHashMap<Integer, GameData> gameDataMap = new ConcurrentHashMap<>();
 
+        private enum UserType {
+            BLACK,
+            WHITE,
+            OBSERVER
+        }
 
         @OnWebSocketMessage
         public void onMessage(Session session, String message) throws Exception {
@@ -161,6 +165,48 @@ public class Server {
             }
 
             if (userCommand.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
+                UserType userType;
+
+                // Check if game is active
+                GameData gameData = gameDataMap.get(gameID);
+
+                // Check if user is a player or observer
+                if (Objects.equals(username, gameData.whiteUsername())) {
+                    userType = UserType.WHITE;
+                } else if (Objects.equals(username, gameData.blackUsername())) {
+                    userType = UserType.BLACK;
+                } else {
+                    userType = UserType.OBSERVER;
+                }
+
+                // double check that they sent an actual move
+                if (userCommand.getMove() == null) {
+                    throw new ResponseException(400, "Error: bad request");
+                }
+
+                // Get startPosition and endPosition in list
+                ChessPosition[] positions = parseMove(userCommand.getMove());
+
+                // deserialize game and check valid moves
+                ChessGame game = gameData.game();
+                var validMoves = game.validMoves(positions[0]);
+
+                boolean isValid = false;
+                ChessMove officialMove = null;
+                for (var move : validMoves) {
+                    if (move.getStartPosition() == positions[0] && move.getEndPosition() == positions[1]) {
+                        isValid = true;
+                        officialMove = move;
+                        break;
+                    }
+                }
+
+                if (!isValid) {
+                    throw new ResponseException(400, "Error: invalid move");
+                }
+
+                game.makeMove(officialMove);
+
                 var sessions = sessionMap.get(gameID);
             }
             if (userCommand.getCommandType() == UserGameCommand.CommandType.LEAVE) {
@@ -229,6 +275,31 @@ public class Server {
                     }
                 });
             }
+        }
+
+        /**
+         * Parse ChessMove from String chess notation (i.e. a2a3)
+         * @return ChessMove
+         */
+        private ChessPosition[] parseMove(String moveString) {
+            int[] posIndices = {0, 0, 0, 0};
+            for (int i = 0; i < moveString.length(); i++) {
+                char pos = moveString.charAt(i);
+                posIndices[i] = switch (pos) {
+                    case 'a' -> 0;
+                    case 'b' -> 1;
+                    case 'c' -> 2;
+                    case 'd' -> 3;
+                    case 'e' -> 4;
+                    case 'f' -> 5;
+                    case 'g' -> 6;
+                    case 'h' -> 7;
+                    default -> (pos - '0') - 1;
+                };
+            }
+            ChessPosition startPos = new ChessPosition(posIndices[0], posIndices[1]);
+            ChessPosition endPos = new ChessPosition(posIndices[2], posIndices[3]);
+            return new ChessPosition[]{startPos, endPos};
         }
     }
 

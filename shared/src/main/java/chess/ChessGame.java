@@ -78,7 +78,7 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         var validMoves = rules.getTeamMoves(board, currTurn);
-        if (!validMoves.contains(move)) {
+        if (move == null || !validMoves.contains(move)) {
             throw new InvalidMoveException(String.format("%s is not a valid move", move));
         }
         board.movePiece(move);
