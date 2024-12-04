@@ -82,4 +82,17 @@ public class GameService {
             throw new ResponseException(400, "Error: bad request");
         }
     }
+
+    public GameData getGame(int gameID) throws ResponseException {
+        GameData currGame = null;
+        try {
+            currGame = gameDAO.getGame(gameID);
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+        if (currGame == null) {
+            throw new ResponseException(400, "Error: bad request");
+        }
+        return currGame;
+    }
 }

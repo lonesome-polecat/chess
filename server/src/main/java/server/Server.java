@@ -29,7 +29,7 @@ public class Server {
     private final AuthService authService = new AuthService(authDAO, userDAO, gameDAO);
     private final GameService gameService = new GameService(gameDAO);
 
-    private static HashMap<String, WSHandler[]> wsConnections;
+    private WSHandler wsHandler = new WSHandler();
 
     public int run(int desiredPort) {
         // Initialize database
@@ -45,7 +45,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-        Spark.webSocket("/ws/*", WSHandler.class);
+        Spark.webSocket("/ws/*", wsHandler);
         Spark.post("/user", this::registerUser);
         Spark.post("/session", this::loginUser);
         Spark.delete("/session", this::logoutUser);
@@ -110,7 +110,7 @@ public class Server {
     }
 
     @WebSocket
-    public static class WSHandler {
+    public class WSHandler {
         // ConcurrentHashMap to store WebSocket connections
         private static final ConcurrentHashMap<Integer, List<Session>> sessionMap = new ConcurrentHashMap<>();
         private static final ConcurrentHashMap<Integer, GameData> gameDataMap = new ConcurrentHashMap<>();
@@ -119,6 +119,9 @@ public class Server {
         @OnWebSocketMessage
         public void onMessage(Session session, String message) throws Exception {
             var userCommand = new Gson().fromJson(message, UserGameCommand.class);
+            // Verify user
+            String username = authService.getUsernameFromAuthToken(userCommand.getAuthToken());
+
             var gameID = userCommand.getGameID();
 
             System.out.printf("%nReceived request to join game #%d", userCommand.getGameID());
@@ -134,13 +137,27 @@ public class Server {
                 sessionMap.put(gameID, sessions);
 
                 // Check if game is active
+                GameData game;
                 boolean gameExists = gameDataMap.containsKey(gameID);
                 if (!gameExists) {
+                    // fetch game and cache it
+                    game = gameService.getGame(gameID);
+                    gameDataMap.put(gameID, game);
+                } else {
+                    game = gameDataMap.get(gameID);
                 }
 
-                String msg = "Somebody joined this game";
+                // Notify all users that so-and-so joined the game (as color or as observer)
+                String msg = String.format("%s joined the game", username);
                 var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
-                session.getRemote().sendString("WebSocket response: " + message + "\r\n");
+                String notifyMessage = new Gson().toJson(serverMsg);
+                broadcastMessage(gameID, notifyMessage);
+
+                // Send LOAD_GAME to new user
+                var gameJson = new Gson().toJson(game);
+                serverMsg = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameJson);
+                String loadGameMessage = new Gson().toJson(serverMsg);
+                session.getRemote().sendString(loadGameMessage);
             }
 
             if (userCommand.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
@@ -160,11 +177,13 @@ public class Server {
         }
 
         @OnWebSocketError
-        public void onError(Session session, Throwable error) {
+        public void onError(Session session, Throwable error) throws ResponseException {
+            if (error.getClass() == ResponseException.class) {
+                throw new ResponseException(((ResponseException) error).statusCode(), error.getMessage());
+            }
             String sessionId = "unknown";
             if (session != null) {
                 String path = session.getUpgradeRequest().getRequestURI().getPath();
-                sessionId = getSessionIdFromPath(path);
             }
             System.err.println("Error in session " + sessionId + ": " + error.getMessage());
             error.printStackTrace();
@@ -182,28 +201,21 @@ public class Server {
         // On close, remove the session from the group
         @OnWebSocketClose
         public void onClose(Session session, int statusCode, String reason) {
-            String sessionId = getSessionIdFromPath(session.getUpgradeRequest().getRequestURI().getPath());
-
-            // Remove the session
-            List<Session> sessions = sessionMap.get(sessionId);
-            if (sessions != null) {
-                sessions.remove(session);
-                System.out.println("Disconnected: " + sessionId + " | Remaining connections: " + sessions.size());
-
-                if (sessions.isEmpty()) {
-                    sessionMap.remove(sessionId); // Clean up if no connections remain
-                }
-            }
-        }
-
-        // Helper to extract session ID from WebSocket path
-        private String getSessionIdFromPath(String path) {
-            // Assuming the path format is /ws/<session_id>
-            return path.substring(path.lastIndexOf('/') + 1);
+//
+//            // Remove the session
+//            List<Session> sessions = sessionMap.get(sessionId);
+//            if (sessions != null) {
+//                sessions.remove(session);
+//                System.out.println("Disconnected: " + sessionId + " | Remaining connections: " + sessions.size());
+//
+//                if (sessions.isEmpty()) {
+//                    sessionMap.remove(sessionId); // Clean up if no connections remain
+//                }
+//            }
         }
 
         // Helper to broadcast messages to a group
-        private void broadcastMessage(String sessionId, String message) {
+        private void broadcastMessage(Integer sessionId, String message) {
             List<Session> sessions = sessionMap.get(sessionId);
 
             if (sessions != null) {

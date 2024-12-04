@@ -114,6 +114,19 @@ public class AuthService {
         }
     }
 
+    public String getUsernameFromAuthToken(String authToken) throws ResponseException {
+        AuthData authData = null;
+        try {
+            authData = authDAO.getAuth(authToken);
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+        if (authData == null) {
+            throw new ResponseException(401, "Error: unauthorized");
+        }
+        return authData.username();
+    }
+
     public void logoutRequest(String authToken) throws ResponseException {
         try {
             authDAO.deleteAuth(authToken);
