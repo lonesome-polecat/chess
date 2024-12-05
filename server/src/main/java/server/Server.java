@@ -196,10 +196,14 @@ public class Server {
                 boolean isValid = false;
                 ChessMove officialMove = null;
                 for (var move : validMoves) {
-                    if (move.getStartPosition() == positions[0] && move.getEndPosition() == positions[1]) {
-                        isValid = true;
-                        officialMove = move;
-                        break;
+                    var startPos = move.getStartPosition();
+                    var endPos = move.getEndPosition();
+                    if (startPos.equals(positions[0])) {
+                        if (endPos.equals(positions[1])) {
+                            isValid = true;
+                            officialMove = move;
+                            break;
+                        }
                     }
                 }
 
@@ -227,7 +231,22 @@ public class Server {
                     // It's a tie! prep notification
                 }
 
-                var sessions = sessionMap.get(gameID);
+                // Notify all users that so-and-so joined the game (as color or as observer)
+//                String msg = String.format("%s joined the game", username);
+//                var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+//                String notifyMessage = new Gson().toJson(serverMsg);
+//                broadcastMessage(gameID, notifyMessage);
+
+                // Update game in map and DB
+                gameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+                gameDataMap.put(gameID, gameData);
+                gameService.updateGame(gameData);
+
+                // Send LOAD_GAME to all users
+                var gameJson = new Gson().toJson(game);
+                var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameJson);
+                String loadGameMessage = new Gson().toJson(serverMsg);
+                broadcastMessage(gameID, loadGameMessage);
             }
             if (userCommand.getCommandType() == UserGameCommand.CommandType.LEAVE) {
             }
@@ -302,23 +321,24 @@ public class Server {
          * @return ChessMove
          */
         private ChessPosition[] parseMove(String moveString) {
+            // IMPORTANT! The first letter is the COL and the second is the ROW (inverse)
             int[] posIndices = {0, 0, 0, 0};
             for (int i = 0; i < moveString.length(); i++) {
                 char pos = moveString.charAt(i);
                 posIndices[i] = switch (pos) {
-                    case 'a' -> 0;
-                    case 'b' -> 1;
-                    case 'c' -> 2;
-                    case 'd' -> 3;
-                    case 'e' -> 4;
-                    case 'f' -> 5;
-                    case 'g' -> 6;
-                    case 'h' -> 7;
-                    default -> (pos - '0') - 1;
+                    case 'a' -> 1;
+                    case 'b' -> 2;
+                    case 'c' -> 3;
+                    case 'd' -> 4;
+                    case 'e' -> 5;
+                    case 'f' -> 6;
+                    case 'g' -> 7;
+                    case 'h' -> 8;
+                    default -> (pos - '0');
                 };
             }
-            ChessPosition startPos = new ChessPosition(posIndices[0], posIndices[1]);
-            ChessPosition endPos = new ChessPosition(posIndices[2], posIndices[3]);
+            ChessPosition startPos = new ChessPosition(posIndices[1], posIndices[0]);
+            ChessPosition endPos = new ChessPosition(posIndices[3], posIndices[2]);
             return new ChessPosition[]{startPos, endPos};
         }
     }

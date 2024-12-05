@@ -95,4 +95,12 @@ public class GameService {
         }
         return currGame;
     }
+
+    public void updateGame(GameData gameData) throws ResponseException {
+        try {
+            gameDAO.updateGame(gameData);
+        } catch (dataaccess.DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

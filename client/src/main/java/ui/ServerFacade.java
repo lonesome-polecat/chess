@@ -89,7 +89,7 @@ public class ServerFacade {
 
     public void makeMove(String move) {
         // String msg = "This is my first message from my client";
-        var command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, Integer.parseInt(connectedGameId), move);
+        var command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, Integer.parseInt(connectedGameId), move);
         try {
             WSSession.sendUserGameCommand(command);
         } catch (Exception e) {
