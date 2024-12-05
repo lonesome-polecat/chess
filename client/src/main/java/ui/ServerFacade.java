@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import model.*;
 import model.ResponseException;
@@ -98,8 +99,7 @@ public class ServerFacade {
         }
     }
 
-    public void makeMove(String move) {
-        // String msg = "This is my first message from my client";
+    public void makeMove(ChessMove move) {
         var command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, Integer.parseInt(connectedGameId), move);
         try {
             WSSession.sendUserGameCommand(command);

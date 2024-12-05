@@ -46,7 +46,7 @@ public class ChessPosition {
      * @param moveString
      * @return ChessPosition
      */
-    public static ChessPosition parsePosition(String moveString) {
+    public static ChessPosition parseStringToPosition(String moveString) {
         // IMPORTANT! The first letter is the COL and the second is the ROW (inverse)
         int[] posIndices = {0, 0};
         for (int i = 0; i < moveString.length(); i++) {
@@ -64,6 +64,31 @@ public class ChessPosition {
             };
         }
         return new ChessPosition(posIndices[1], posIndices[0]);
+    }
+
+    /**
+     * Takes a ChessPosition and transforms it into a String of chess notation
+     * @param pos
+     * @return String
+     */
+    public static String parsePositionToString(ChessPosition pos) {
+        // IMPORTANT! The first letter is the COL and the second is the ROW (inverse)
+        String positionString = "";
+        var row = pos.getRow();
+        var col = pos.getColumn();
+        positionString = positionString + switch (col) {
+                case 1 -> 'a';
+                case 2 -> 'b';
+                case 3 -> 'c';
+                case 4 -> 'd';
+                case 5 -> 'e';
+                case 6 -> 'f';
+                case 7 -> 'g';
+                case 8 -> 'h';
+            default -> 'a';
+            };
+        positionString = positionString + Integer.toString(row);
+        return positionString;
     }
 
     @Override

@@ -2,6 +2,7 @@ package ui;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 import com.google.gson.Gson;
 import model.*;
@@ -10,6 +11,8 @@ import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Scanner;
 
 public class ChessClient {
     private final ServerFacade server;
@@ -262,7 +265,9 @@ public class ChessClient {
         if (params.length != 1) {
             throw new ResponseException(400, "You must enter a move like this: a2a3");
         }
-        server.makeMove(params[0]);
+
+        ChessMove move = parseMove(params[0]);
+        server.makeMove(move);
         return "You made a move";
     }
 
@@ -290,8 +295,8 @@ public class ChessClient {
         System.out.flush();
         ServerMessage message = new Gson().fromJson(msg, ServerMessage.class);
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-            var gameData = new Gson().fromJson(message.getMessage(), GameData.class);
-            currGame = gameData.game();
+            var game = message.getGame();
+            currGame = game;
             refreshGame();
         } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
             System.out.printf("%s%n", message.getMessage());
@@ -313,7 +318,7 @@ public class ChessClient {
         } else if (params[0].length() != 2) {
             return "Invalid input: must be single chess position in Chess notation (i.e. a2)";
         }
-        var piecePosition = ChessPosition.parsePosition(params[0]);
+        var piecePosition = ChessPosition.parseStringToPosition(params[0]);
         Collection<ChessMove> validMoves;
         try {
             validMoves = currGame.validMoves(piecePosition);
@@ -353,5 +358,46 @@ public class ChessClient {
             }
         }
         return false;
+    }
+
+    private ChessMove parseMove(String moveString) {
+        ChessPosition startPosition = ChessPosition.parseStringToPosition(moveString.substring(0,2));
+        ChessPosition endPosition = ChessPosition.parseStringToPosition(moveString.substring(2,4));
+        var board = currGame.getBoard();
+        var piece = board.getPiece(startPosition);
+        var row = endPosition.getRow();
+        ChessPiece.PieceType promotionPiece = null;
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN && (row == 8 || row == 1)) {
+            // Prompt user for promotion piece
+            Scanner scanner = new Scanner(System.in);
+
+            List<String> validOptions = Arrays.asList("queen", "bishop", "knight", "rook");
+            String choice = getValidatedString(scanner, "What would you like this pawn to become? (queen/bishop/knight/rook): ", validOptions);
+            promotionPiece = switch(choice) {
+                case "queen" -> ChessPiece.PieceType.QUEEN;
+                case "bishop" -> ChessPiece.PieceType.BISHOP;
+                case "knight" -> ChessPiece.PieceType.KNIGHT;
+                case "rook" -> ChessPiece.PieceType.ROOK;
+                default -> ChessPiece.PieceType.QUEEN;
+            };
+        }
+        return new ChessMove(startPosition, endPosition, promotionPiece);
+    }
+
+    private static String getValidatedString(Scanner scanner, String prompt, List<String> validOptions) {
+        String input = "";
+        boolean isValid = false;
+
+        while (!isValid) {
+            System.out.print(prompt);
+            input = scanner.nextLine().trim().toLowerCase(); // Normalize input
+            if (validOptions.contains(input)) {
+                isValid = true;
+            } else {
+                System.out.println("Invalid input. Valid options are: " + validOptions);
+            }
+        }
+
+        return input;
     }
 }

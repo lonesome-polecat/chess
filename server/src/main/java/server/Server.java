@@ -114,18 +114,31 @@ public class Server {
         // ConcurrentHashMap to store WebSocket connections
         private static final ConcurrentHashMap<Integer, List<Session>> sessionMap = new ConcurrentHashMap<>();
         private static final ConcurrentHashMap<Integer, GameData> gameDataMap = new ConcurrentHashMap<>();
+        private static final LinkedList<String> users = new LinkedList<String>();
 
         @OnWebSocketMessage
         public void onMessage(Session session, String message) throws Exception {
             var userCommand = new Gson().fromJson(message, UserGameCommand.class);
             // Verify user
-            String username = authService.getUsernameFromAuthToken(userCommand.getAuthToken());
+            String username;
+            try {
+                username = authService.getUsernameFromAuthToken(userCommand.getAuthToken());
+            } catch (Exception e) {
+                // Bad gameID
+                var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                serverErrorMessage.setErrorMessage("Error: invalid authToken");
+                var errorMsg = new Gson().toJson(serverErrorMessage);
+                session.getRemote().sendString(errorMsg);
+                return;
+            }
 
+            users.add(username);
             var gameID = userCommand.getGameID();
 
-            System.out.printf("%nReceived request from %s to join game #%d", username, userCommand.getGameID());
-
             if (userCommand.getCommandType() == UserGameCommand.CommandType.CONNECT) {
+
+                System.out.printf("%nReceived request from %s to join game #%d", username, userCommand.getGameID());
+
                 // Check if there are existing connections to that game
                 var sessions = sessionMap.get(gameID);
                 if (sessions == null) {
@@ -134,13 +147,22 @@ public class Server {
 
                 // Check if game is active
                 // Sleep just in case joinGameRequest hasn't been processed yet - need to get player color
-                TimeUnit.SECONDS.sleep(1);
+//                TimeUnit.SECONDS.sleep(1);
                 GameData game;
                 boolean gameExists = gameDataMap.containsKey(gameID);
                 if (!gameExists) {
                     // fetch game and cache it
-                    game = gameService.getGame(gameID);
-                    gameDataMap.put(gameID, game);
+                    try {
+                        game = gameService.getGame(gameID);
+                        gameDataMap.put(gameID, game);
+                    } catch (Exception e) {
+                        // Bad gameID
+                        var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                        serverErrorMessage.setErrorMessage("Error: invalid gameID");
+                        var errorMsg = new Gson().toJson(serverErrorMessage);
+                        session.getRemote().sendString(errorMsg);
+                        return;
+                    }
                 } else {
                     game = gameDataMap.get(gameID);
                 }
@@ -158,15 +180,15 @@ public class Server {
                 String msg = String.format("%s joined the game as %s", username, playerOrObserver);
                 var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                 String notifyMessage = new Gson().toJson(serverMsg);
-                broadcastMessage(gameID, notifyMessage);
+                broadcastMessage(gameID, notifyMessage, session);
 
                 // Add new connection to game
                 sessions.add(session);
                 sessionMap.put(gameID, sessions);
 
                 // Send LOAD_GAME to new user
-                var gameJson = new Gson().toJson(game);
-                serverMsg = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameJson);
+                serverMsg = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null);
+                serverMsg.setGame(game.game());
                 String loadGameMessage = new Gson().toJson(serverMsg);
                 session.getRemote().sendString(loadGameMessage);
             }
@@ -206,14 +228,11 @@ public class Server {
                 }
 
                 // Get startPosition and endPosition in list
-                // TODO: the following code is incomplete and needs to parse promotion piece
-                String moveString = userCommand.getMove();
-                ChessPosition startPosition = ChessPosition.parsePosition(moveString.substring(0,2));
-                ChessPosition endPosition = ChessPosition.parsePosition(moveString.substring(2,4));
+                var move = userCommand.getMove();
 
                 // Check that player's move is valid
                 var board = game.getBoard();
-                var piece = board.getPiece(startPosition);
+                var piece = board.getPiece(move.getStartPosition());
                 if (piece == null) {
                     var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: invalid move");
                     var errorMsg = new Gson().toJson(serverErrorMessage);
@@ -225,17 +244,16 @@ public class Server {
                     session.getRemote().sendString(errorMsg);
                     return;
                 }
-                var validMoves = game.validMoves(startPosition);
+                var validMoves = game.validMoves(move.getStartPosition());
 
                 boolean isValid = false;
                 ChessMove officialMove = null;
-                for (var move : validMoves) {
-                    var startPos = move.getStartPosition();
-                    var endPos = move.getEndPosition();
-                    if (startPos.equals(startPosition)) {
-                        if (endPos.equals(endPosition)) {
+                for (var validMove : validMoves) {
+                    var startPos = validMove.getStartPosition();
+                    var endPos = validMove.getEndPosition();
+                    if (startPos.equals(move.getStartPosition())) {
+                        if (endPos.equals(move.getEndPosition())) {
                             isValid = true;
-                            officialMove = move;
                             break;
                         }
                     }
@@ -248,7 +266,7 @@ public class Server {
                     return;
                 }
 
-                game.makeMove(officialMove);
+                game.makeMove(move);
 
                 // Check to see if opponent in check or checkmate or stalemate
                 ChessGame.TeamColor opponentColor = switch (playerColor) {
@@ -285,15 +303,24 @@ public class Server {
                 gameService.updateGame(gameData);
 
                 // Send LOAD_GAME to all users
-                var gameJson = new Gson().toJson(gameData);
-                var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameJson);
+                var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null);
+                serverMsg.setGame(gameData.game());
                 String loadGameMessage = new Gson().toJson(serverMsg);
-                broadcastMessage(gameID, loadGameMessage);
+                broadcastMessage(gameID, loadGameMessage, null);
+
+                // Send NOTIFICATION of move to all other users
+                String startPos = ChessPosition.parsePositionToString(move.getStartPosition());
+                String endPos = ChessPosition.parsePositionToString(move.getEndPosition());
+
+                var msg = String.format("%s (%s) moved from %s to %s", username, playerColor, startPos, endPos);
+                serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+                String moveNotification = new Gson().toJson(serverMsg);
+                broadcastMessage(gameID, moveNotification, session);
 
                 if (checkOrGameOverServerMsg != null) {
                     // Notify users of check or end of game
                     String checkOrGameOverMsg = new Gson().toJson(checkOrGameOverServerMsg);
-                    broadcastMessage(gameID, checkOrGameOverMsg);
+                    broadcastMessage(gameID, checkOrGameOverMsg, null);
                 }
             }
             if (userCommand.getCommandType() == UserGameCommand.CommandType.LEAVE) {
@@ -309,7 +336,7 @@ public class Server {
                 // Send NOTIFICATION to all users
                 var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s left the game", username));
                 String leaveGameMessage = new Gson().toJson(serverMsg);
-                broadcastMessage(gameID, leaveGameMessage);
+                broadcastMessage(gameID, leaveGameMessage, null);
                 session.close();
             }
 
@@ -357,7 +384,7 @@ public class Server {
                 var msg = String.format("%s (%s) resigned. %s (%s) wins!", username, playerColor, opponentUsername, opponentColor);
                 var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                 String leaveGameMessage = new Gson().toJson(serverMsg);
-                broadcastMessage(gameID, leaveGameMessage);
+                broadcastMessage(gameID, leaveGameMessage, null);
             }
         }
 
@@ -400,14 +427,16 @@ public class Server {
         }
 
         // Helper to broadcast messages to a group
-        private void broadcastMessage(Integer sessionId, String message) {
+        private void broadcastMessage(Integer sessionId, String message, Session session) {
             List<Session> sessions = sessionMap.get(sessionId);
 
             if (sessions != null) {
                 sessions.forEach(s -> {
                     try {
                         if (s.isOpen()) {
-                            s.getRemote().sendString(message); // Send the message
+                            if (!s.equals(session)) {
+                                s.getRemote().sendString(message); // Send the message
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

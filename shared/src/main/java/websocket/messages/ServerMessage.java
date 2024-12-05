@@ -13,6 +13,8 @@ import java.util.Objects;
 public class ServerMessage {
     ServerMessageType serverMessageType;
     String message;
+    String errorMessage;
+    ChessGame game = null;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -31,6 +33,22 @@ public class ServerMessage {
 
     public String getMessage() {
         return this.message;
+    }
+
+    public String getErrorMessage() {
+        return this.errorMessage;
+    }
+
+    public void setErrorMessage(String msg) {
+        errorMessage = msg;
+    }
+
+    public void setGame(ChessGame game) {
+        this.game = game;
+    }
+
+    public ChessGame getGame() {
+        return game;
     }
 
     @Override
