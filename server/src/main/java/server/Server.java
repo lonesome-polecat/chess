@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
 
@@ -132,6 +133,8 @@ public class Server {
                 }
 
                 // Check if game is active
+                // Sleep just in case joinGameRequest hasn't been processed yet - need to get player color
+                TimeUnit.SECONDS.sleep(1);
                 GameData game;
                 boolean gameExists = gameDataMap.containsKey(gameID);
                 if (!gameExists) {
@@ -142,8 +145,17 @@ public class Server {
                     game = gameDataMap.get(gameID);
                 }
 
+                var playerOrObserver = "an observer";
+
+                // Check if user is a player or observer
+                if (Objects.equals(username, game.whiteUsername())) {
+                    playerOrObserver = "WHITE";
+                } else if (Objects.equals(username, game.blackUsername())) {
+                    playerOrObserver = "BLACK";
+                }
+
                 // Notify all users that so-and-so joined the game (as color or as observer)
-                String msg = String.format("%s joined the game", username);
+                String msg = String.format("%s joined the game as %s", username, playerOrObserver);
                 var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                 String notifyMessage = new Gson().toJson(serverMsg);
                 broadcastMessage(gameID, notifyMessage);
