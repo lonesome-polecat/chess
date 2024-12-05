@@ -303,6 +303,11 @@ public class ChessClient {
         return "";
     }
 
+    private String highlightValidMoves(String[] params) {
+
+        return "";
+    }
+
     private void initGamesList() throws ResponseException {
         // Once user is logged in fetch games in background
         allGames = server.listGames();

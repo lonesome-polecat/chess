@@ -207,11 +207,13 @@ public class Server {
 
                 // Get startPosition and endPosition in list
                 // TODO: the following code is incomplete and needs to parse promotion piece
-                ChessPosition[] positions = parseMove(userCommand.getMove());
+                String moveString = userCommand.getMove();
+                ChessPosition startPosition = ChessPosition.parsePosition(moveString.substring(0,2));
+                ChessPosition endPosition = ChessPosition.parsePosition(moveString.substring(2,4));
 
                 // Check that player's move is valid
                 var board = game.getBoard();
-                var piece = board.getPiece(positions[0]);
+                var piece = board.getPiece(startPosition);
                 if (piece == null) {
                     var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: invalid move");
                     var errorMsg = new Gson().toJson(serverErrorMessage);
@@ -223,15 +225,15 @@ public class Server {
                     session.getRemote().sendString(errorMsg);
                     return;
                 }
-                var validMoves = game.validMoves(positions[0]);
+                var validMoves = game.validMoves(startPosition);
 
                 boolean isValid = false;
                 ChessMove officialMove = null;
                 for (var move : validMoves) {
                     var startPos = move.getStartPosition();
                     var endPos = move.getEndPosition();
-                    if (startPos.equals(positions[0])) {
-                        if (endPos.equals(positions[1])) {
+                    if (startPos.equals(startPosition)) {
+                        if (endPos.equals(endPosition)) {
                             isValid = true;
                             officialMove = move;
                             break;
@@ -412,32 +414,6 @@ public class Server {
                     }
                 });
             }
-        }
-
-        /**
-         * Parse ChessMove from String chess notation (i.e. a2a3)
-         * @return ChessMove
-         */
-        private ChessPosition[] parseMove(String moveString) {
-            // IMPORTANT! The first letter is the COL and the second is the ROW (inverse)
-            int[] posIndices = {0, 0, 0, 0};
-            for (int i = 0; i < moveString.length(); i++) {
-                char pos = moveString.charAt(i);
-                posIndices[i] = switch (pos) {
-                    case 'a' -> 1;
-                    case 'b' -> 2;
-                    case 'c' -> 3;
-                    case 'd' -> 4;
-                    case 'e' -> 5;
-                    case 'f' -> 6;
-                    case 'g' -> 7;
-                    case 'h' -> 8;
-                    default -> (pos - '0');
-                };
-            }
-            ChessPosition startPos = new ChessPosition(posIndices[1], posIndices[0]);
-            ChessPosition endPos = new ChessPosition(posIndices[3], posIndices[2]);
-            return new ChessPosition[]{startPos, endPos};
         }
     }
 

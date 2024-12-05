@@ -41,6 +41,31 @@ public class ChessPosition {
         // throw new RuntimeException("Not implemented");
     }
 
+    /**
+     * Takes a two char String in chess notation (i.e. a2) and parses it into a ChessPosition
+     * @param moveString
+     * @return ChessPosition
+     */
+    public static ChessPosition parsePosition(String moveString) {
+        // IMPORTANT! The first letter is the COL and the second is the ROW (inverse)
+        int[] posIndices = {0, 0};
+        for (int i = 0; i < moveString.length(); i++) {
+            char pos = moveString.charAt(i);
+            posIndices[i] = switch (pos) {
+                case 'a' -> 1;
+                case 'b' -> 2;
+                case 'c' -> 3;
+                case 'd' -> 4;
+                case 'e' -> 5;
+                case 'f' -> 6;
+                case 'g' -> 7;
+                case 'h' -> 8;
+                default -> (pos - '0');
+            };
+        }
+        return new ChessPosition(posIndices[1], posIndices[0]);
+    }
+
     @Override
     public String toString() {
         String strRow = Integer.toString(row);
