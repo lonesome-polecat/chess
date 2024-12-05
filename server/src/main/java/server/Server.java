@@ -206,7 +206,8 @@ public class Server {
                     playerColor = ChessGame.TeamColor.BLACK;
                 } else {
                     // user is not a player
-                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: user is not a player in game");
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                    serverErrorMessage.setErrorMessage("Error: user is not a player in game");
                     var errorMsg = new Gson().toJson(serverErrorMessage);
                     session.getRemote().sendString(errorMsg);
                     return;
@@ -216,11 +217,22 @@ public class Server {
                 ChessGame game = gameData.game();
                 var currTurn = game.getTeamTurn();
                 if (currTurn != playerColor) {
-                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "It is not your turn");
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                    serverErrorMessage.setErrorMessage("It is not your turn");
                     var errorMsg = new Gson().toJson(serverErrorMessage);
                     session.getRemote().sendString(errorMsg);
                     return;
                 }
+
+                // check if game has already ended
+                if (game.getGameState() == ChessGame.GameState.GAME_OVER) {
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                    serverErrorMessage.setErrorMessage("Error: the game is over. No more moves can be made");
+                    var errorMsg = new Gson().toJson(serverErrorMessage);
+                    session.getRemote().sendString(errorMsg);
+                    return;
+                }
+
 
                 // double check that they sent an actual move
                 if (userCommand.getMove() == null) {
@@ -234,12 +246,14 @@ public class Server {
                 var board = game.getBoard();
                 var piece = board.getPiece(move.getStartPosition());
                 if (piece == null) {
-                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: invalid move");
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                    serverErrorMessage.setErrorMessage("Error: invalid move");
                     var errorMsg = new Gson().toJson(serverErrorMessage);
                     session.getRemote().sendString(errorMsg);
                     return;
                 } else if (piece.getTeamColor() != playerColor) {
-                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: invalid move");
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                    serverErrorMessage.setErrorMessage("Error: invalid move");
                     var errorMsg = new Gson().toJson(serverErrorMessage);
                     session.getRemote().sendString(errorMsg);
                     return;
@@ -260,7 +274,8 @@ public class Server {
                 }
 
                 if (!isValid) {
-                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: invalid move");
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                    serverErrorMessage.setErrorMessage("Error: invalid move");
                     var errorMsg = new Gson().toJson(serverErrorMessage);
                     session.getRemote().sendString(errorMsg);
                     return;
@@ -356,7 +371,8 @@ public class Server {
                     opponentColor = ChessGame.TeamColor.WHITE;
                 } else {
                     // user is not a player
-                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: user is not a player in game");
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                    serverErrorMessage.setErrorMessage("Error: user is not a player in game");
                     var errorMsg = new Gson().toJson(serverErrorMessage);
                     session.getRemote().sendString(errorMsg);
                     return;

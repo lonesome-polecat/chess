@@ -13,7 +13,7 @@ public class ChessGame {
     private ChessBoard board = new ChessBoard();
     private TeamColor currTurn = TeamColor.WHITE;
     private ChessRules rules = new ChessRules();
-    private enum GameState {
+    public enum GameState {
         IN_PLAY,
         GAME_OVER
     }
