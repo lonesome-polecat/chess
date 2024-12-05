@@ -1,9 +1,10 @@
 package ui;
 
 import chess.ChessGame;
-import chess.ChessMove;
+import com.google.gson.Gson;
 import model.*;
 import model.ResponseException;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 
@@ -12,6 +13,7 @@ public class ChessClient {
     private final String serverUrl;
     private State state;
     public ListGamesResponse allGames = null;
+    private ChessGame.TeamColor teamColor = ChessGame.TeamColor.WHITE;
 
     private enum State {
             SIGNED_IN,
@@ -200,11 +202,12 @@ public class ChessClient {
         try {
             server.joinGame(joinGameRequest);
             // Enter gameplay state
-            var result = displayGame(gameID, playerColor);
+            var result = checkValidGameID(gameID, playerColor);
             if (!result) {
                 return "Error: unable to play game";
             }
             state = State.GAMEPLAY;
+            teamColor = playerColor;
             return String.format("You joined a game as %s team", playerColorString);
         } catch (ResponseException e) {
             return "Error: unable to play game";
@@ -222,7 +225,7 @@ public class ChessClient {
         }
         var gameID = params[0];
 
-        var result = displayGame(gameID, ChessGame.TeamColor.WHITE);
+        var result = checkValidGameID(gameID, ChessGame.TeamColor.WHITE);
         if (!result) {
             return "Error: invalid game number";
         }
@@ -246,6 +249,7 @@ public class ChessClient {
         }
         server.leaveGame();
         state = State.SIGNED_IN;
+        teamColor = ChessGame.TeamColor.WHITE;
         return "You left the game";
     }
 
@@ -262,6 +266,15 @@ public class ChessClient {
     public void onMessage(String msg) {
         System.out.flush();
         System.out.printf("Incoming msg: %s%n", msg);
+        ServerMessage message = new Gson().fromJson(msg, ServerMessage.class);
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            var game = new Gson().fromJson(message.getMessage(), ChessGame.class);
+            refreshGame(game);
+        }
+    }
+
+    private void refreshGame(ChessGame game) {
+        BoardUI.drawBoard(game.getBoard(), teamColor);
     }
 
     private void initGamesList() throws ResponseException {
@@ -285,11 +298,10 @@ public class ChessClient {
         return gameList;
     }
 
-    private boolean displayGame(String gameID, ChessGame.TeamColor playerColor) throws ResponseException {
+    private boolean checkValidGameID(String gameID, ChessGame.TeamColor playerColor) throws ResponseException {
+        initGamesList();
         for (var game : allGames.games()) {
             if (game.gameID() == Integer.parseInt(gameID)) {
-                var chessGame = game.game();
-                BoardUI.drawBoard(chessGame.getBoard(), playerColor);
                 return true;
             }
         }
