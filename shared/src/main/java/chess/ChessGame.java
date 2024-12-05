@@ -13,9 +13,27 @@ public class ChessGame {
     private ChessBoard board = new ChessBoard();
     private TeamColor currTurn = TeamColor.WHITE;
     private ChessRules rules = new ChessRules();
+    private enum GameState {
+        IN_PLAY,
+        GAME_OVER
+    }
+    private GameState gameState = GameState.IN_PLAY;
+    private TeamColor winner = null;
 
     public ChessGame() {
         board.resetBoard();
+    }
+
+    public GameState getGameState() {
+        return gameState;
+    }
+
+    public void gameOver() {
+        gameState = GameState.GAME_OVER;
+    }
+
+    public void setWinner(TeamColor color) {
+        winner = color;
     }
 
     /**

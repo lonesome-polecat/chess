@@ -122,7 +122,7 @@ public class Server {
 
             var gameID = userCommand.getGameID();
 
-            System.out.printf("%nReceived request to join game #%d", userCommand.getGameID());
+            System.out.printf("%nReceived request from %s to join game #%d", username, userCommand.getGameID());
 
             if (userCommand.getCommandType() == UserGameCommand.CommandType.CONNECT) {
                 // Check if there are existing connections to that game
@@ -130,9 +130,6 @@ public class Server {
                 if (sessions == null) {
                     sessions = new LinkedList<Session>();
                 }
-                // Add new connection to game
-                sessions.add(session);
-                sessionMap.put(gameID, sessions);
 
                 // Check if game is active
                 GameData game;
@@ -150,6 +147,10 @@ public class Server {
                 var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                 String notifyMessage = new Gson().toJson(serverMsg);
                 broadcastMessage(gameID, notifyMessage);
+
+                // Add new connection to game
+                sessions.add(session);
+                sessionMap.put(gameID, sessions);
 
                 // Send LOAD_GAME to new user
                 var gameJson = new Gson().toJson(game);
@@ -241,23 +242,28 @@ public class Server {
                     case WHITE -> ChessGame.TeamColor.BLACK;
                 };
                 game.setTeamTurn(opponentColor);
+
+                ServerMessage checkOrGameOverServerMsg = null;
                 if (game.isInCheck(opponentColor)) {
                     if (game.isInCheckmate(opponentColor)) {
                         // user won! prep notification
+                        game.gameOver();
+                        game.setWinner(playerColor);
 
+                        var msg = String.format("Checkmate! %s (%s) wins!", username, playerColor);
+                        checkOrGameOverServerMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                     } else {
                         // opponent in check, prep notification
+                        var msg = String.format("%s is in check", opponentColor);
+                        checkOrGameOverServerMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                     }
                 }
                 if (game.isInStalemate(opponentColor)) {
                     // It's a tie! prep notification
+                    game.gameOver();
+                    var msg = String.format("%s is in stalemate! It's a tie!", opponentColor);
+                    checkOrGameOverServerMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                 }
-
-                // Notify all users that so-and-so joined the game (as color or as observer)
-//                String msg = String.format("%s joined the game", username);
-//                var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
-//                String notifyMessage = new Gson().toJson(serverMsg);
-//                broadcastMessage(gameID, notifyMessage);
 
                 // Update game in map and DB
                 gameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
@@ -269,18 +275,76 @@ public class Server {
                 var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameJson);
                 String loadGameMessage = new Gson().toJson(serverMsg);
                 broadcastMessage(gameID, loadGameMessage);
+
+                if (checkOrGameOverServerMsg != null) {
+                    // Notify users of check or end of game
+                    String checkOrGameOverMsg = new Gson().toJson(checkOrGameOverServerMsg);
+                    broadcastMessage(gameID, checkOrGameOverMsg);
+                }
             }
             if (userCommand.getCommandType() == UserGameCommand.CommandType.LEAVE) {
-            }
-            if (userCommand.getCommandType() == UserGameCommand.CommandType.RESIGN) {
+                var sessions = sessionMap.get(gameID);
+                for (int i = 0; i < sessions.size(); i++) {
+                    if (sessions.get(i).equals(session)) {
+                        sessions.remove(i);
+                        break;
+                    }
+                }
+                sessionMap.put(gameID, sessions);
+
+                // Send NOTIFICATION to all users
+                var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s left the game", username));
+                String leaveGameMessage = new Gson().toJson(serverMsg);
+                broadcastMessage(gameID, leaveGameMessage);
+                session.close();
             }
 
-//            if (session.isOpen()) {
-//                session.getRemote().sendString("WebSocket response: " + message + "\r\n");
-//            }
-//
-            // Broadcast message to all sessions in the group
-            // broadcastMessage(sessionId, message);
+            if (userCommand.getCommandType() == UserGameCommand.CommandType.RESIGN) {
+                ChessGame.TeamColor playerColor;
+                ChessGame.TeamColor opponentColor;
+
+                // Check if game is active
+                GameData gameData = gameDataMap.get(gameID);
+
+                // Check if user is a player or observer
+                if (Objects.equals(username, gameData.whiteUsername())) {
+                    playerColor = ChessGame.TeamColor.WHITE;
+                    opponentColor = ChessGame.TeamColor.BLACK;
+                } else if (Objects.equals(username, gameData.blackUsername())) {
+                    playerColor = ChessGame.TeamColor.BLACK;
+                    opponentColor = ChessGame.TeamColor.WHITE;
+                } else {
+                    // user is not a player
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: user is not a player in game");
+                    var errorMsg = new Gson().toJson(serverErrorMessage);
+                    session.getRemote().sendString(errorMsg);
+                    return;
+                }
+
+                // End game
+                var game = gameData.game();
+                game.gameOver();
+                game.setWinner(opponentColor);
+
+                // Update game in map and DB
+                gameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+                gameDataMap.put(gameID, gameData);
+                gameService.updateGame(gameData);
+
+                // Get opponent username for message
+                String opponentUsername;
+                if (opponentColor == ChessGame.TeamColor.WHITE) {
+                    opponentUsername = gameData.whiteUsername();
+                } else {
+                    opponentUsername = gameData.blackUsername();
+                }
+
+                // Send NOTIFICATION to all users
+                var msg = String.format("%s (%s) resigned. %s (%s) wins!", username, playerColor, opponentUsername, opponentColor);
+                var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+                String leaveGameMessage = new Gson().toJson(serverMsg);
+                broadcastMessage(gameID, leaveGameMessage);
+            }
         }
 
         @OnWebSocketError
