@@ -33,20 +33,34 @@ public class ChessClient {
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cmd) {
-                case "signin" -> signIn(params);
-                case "register" -> register(params);
-                case "creategame" -> createGame(params);
-                case "listgames" -> listGames();
-                case "playgame" -> joinGame(params);
-                case "observegame" -> observeGame(params);
-                case "leave" -> leaveGame();
-                case "makemove" -> makeMove(params);
-                case "drawboard" -> refreshGame();
-                case "signout" -> signOut();
-                case "quit" -> "quit";
-                default -> help();
-            };
+            if (state == State.GAMEPLAY) {
+                return switch (cmd) {
+                    case "makemove" -> makeMove(params);
+                    case "drawboard" -> refreshGame();
+                    case "leave" -> leaveGame();
+                    case "resign" -> resignGame();
+                    case "signout" -> signOut();
+                    default -> help();
+                };
+            } else if (state == State.SIGNED_IN) {
+                return switch (cmd) {
+                    case "creategame" -> createGame(params);
+                    case "listgames" -> listGames();
+                    case "playgame" -> joinGame(params);
+                    case "observegame" -> observeGame(params);
+                    case "signin" -> signIn(params);
+                    case "signout" -> signOut();
+                    case "quit" -> "quit";
+                    default -> help();
+                };
+            } else {
+                return switch (cmd) {
+                    case "signin" -> signIn(params);
+                    case "register" -> register(params);
+                    case "quit" -> "quit";
+                    default -> help();
+                };
+            }
         } catch (ResponseException ex) {
             return ex.getMessage();
         }
@@ -265,8 +279,7 @@ public class ChessClient {
         }
         // Add a "are you sure?" prompt
         server.resignGame();
-        state = State.SIGNED_IN;
-        return "You left the game";
+        return "You resigned";
     }
 
     public void onMessage(String msg) {
