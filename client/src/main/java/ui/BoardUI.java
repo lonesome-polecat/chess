@@ -17,8 +17,8 @@ public class BoardUI {
     private static final String BORDER_BG_COLOR = SET_BG_COLOR_DARK_GREY;
 
     private static final String BORDER_TEXT_COLOR = SET_TEXT_COLOR_LIGHT_GREY;
-    private static final String WHITE_TEAM_COLOR = SET_TEXT_COLOR_BLACK;
-    private static final String BLACK_TEAM_COLOR = SET_TEXT_COLOR_WHITE;
+    private static final String WHITE_TEAM_COLOR = SET_TEXT_COLOR_WHITE;
+    private static final String BLACK_TEAM_COLOR = SET_TEXT_COLOR_BLACK;
 
     private static final String[] ROW_NUMBERS = {"1", "2", "3", "4", "5", "6", "7", "8"};
     private static final String[] COL_LETTERS = {"h", "g", "f", "e", "d", "c", "b", "a"};
@@ -58,7 +58,7 @@ public class BoardUI {
     private static void printHeaders(ChessGame.TeamColor teamColor) {
         OUT.print(BORDER_BG_COLOR + BORDER_TEXT_COLOR);
         OUT.print("   ");
-        if (teamColor == ChessGame.TeamColor.WHITE) {
+        if (teamColor == ChessGame.TeamColor.BLACK) {
             for (int i = 0; i < COL_LETTERS.length; i++) {
                 OUT.printf(" %s ", COL_LETTERS[i]);
             }
@@ -74,7 +74,7 @@ public class BoardUI {
     private static void printSideBorder(int index, ChessGame.TeamColor teamColor) {
         // Index will come in as 2-9, need to adjust for that
         OUT.print(BORDER_BG_COLOR + BORDER_TEXT_COLOR);
-        if (teamColor == ChessGame.TeamColor.WHITE) {
+        if (teamColor == ChessGame.TeamColor.BLACK) {
             OUT.printf(" %s ", ROW_NUMBERS[index-2]);
         } else {
             OUT.printf(" %s ", ROW_NUMBERS[9-index]);
@@ -87,9 +87,9 @@ public class BoardUI {
         // Compensate as need be
         ChessPosition pos;
         if (teamColor == ChessGame.TeamColor.WHITE) {
-            pos = new ChessPosition(10-iIndex, 9-jIndex);
+            pos = new ChessPosition(10-iIndex, jIndex);
         } else {
-            pos = new ChessPosition(iIndex-1, jIndex);
+            pos = new ChessPosition(iIndex-1, 9-jIndex);
         }
         var piece = board.getPiece(pos);
         String icon = " ";

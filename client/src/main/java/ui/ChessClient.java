@@ -185,13 +185,18 @@ public class ChessClient {
             throw new ResponseException(400, "You must enter which game number and team color to play as");
         }
         var gameID = params[0];
-        var playerColor = params[1].toUpperCase();
+        var playerColorString = params[1].toUpperCase();
+        ChessGame.TeamColor playerColor;
         // Make sure playerColor is correct string
-        if (!playerColor.equals("BLACK") && !playerColor.equals("WHITE")) {
+        if (playerColorString.equals("BLACK")) {
+            playerColor = ChessGame.TeamColor.BLACK;
+        } else if (playerColorString.equals("WHITE")) {
+            playerColor = ChessGame.TeamColor.WHITE;
+        } else {
             return "Must specify color to play as: BLACK or WHITE";
         }
 
-        var joinGameRequest = new JoinGameRequest(gameID, playerColor);
+        var joinGameRequest = new JoinGameRequest(gameID, playerColorString);
         try {
             server.joinGame(joinGameRequest);
             // Enter gameplay state
@@ -200,7 +205,7 @@ public class ChessClient {
                 return "Error: unable to play game";
             }
             state = State.GAMEPLAY;
-            return String.format("You joined a game as %s team", playerColor);
+            return String.format("You joined a game as %s team", playerColorString);
         } catch (ResponseException e) {
             return "Error: unable to play game";
         }
@@ -217,7 +222,7 @@ public class ChessClient {
         }
         var gameID = params[0];
 
-        var result = displayGame(gameID, "WHITE");
+        var result = displayGame(gameID, ChessGame.TeamColor.WHITE);
         if (!result) {
             return "Error: invalid game number";
         }
@@ -280,12 +285,11 @@ public class ChessClient {
         return gameList;
     }
 
-    private boolean displayGame(String gameID, String playerColor) throws ResponseException {
+    private boolean displayGame(String gameID, ChessGame.TeamColor playerColor) throws ResponseException {
         for (var game : allGames.games()) {
             if (game.gameID() == Integer.parseInt(gameID)) {
                 var chessGame = game.game();
-                BoardUI.drawBoard(chessGame.getBoard(), ChessGame.TeamColor.WHITE);
-                BoardUI.drawBoard(chessGame.getBoard(), ChessGame.TeamColor.BLACK);
+                BoardUI.drawBoard(chessGame.getBoard(), playerColor);
                 return true;
             }
         }
