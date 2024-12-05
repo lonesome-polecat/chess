@@ -14,6 +14,7 @@ public class ChessClient {
     private State state;
     public ListGamesResponse allGames = null;
     private ChessGame.TeamColor teamColor = ChessGame.TeamColor.WHITE;
+    private ChessGame currGame = null;
 
     private enum State {
             SIGNED_IN,
@@ -41,6 +42,7 @@ public class ChessClient {
                 case "observegame" -> observeGame(params);
                 case "leave" -> leaveGame();
                 case "makemove" -> makeMove(params);
+                case "drawboard" -> refreshGame();
                 case "signout" -> signOut();
                 case "quit" -> "quit";
                 default -> help();
@@ -211,7 +213,7 @@ public class ChessClient {
             return String.format("You joined a game as %s team", playerColorString);
         } catch (ResponseException e) {
             teamColor = ChessGame.TeamColor.WHITE;
-            return "Error: unable to play game";
+            return "Error: unable to play that game";
         }
     }
 
@@ -230,6 +232,8 @@ public class ChessClient {
         if (!result) {
             return "Error: invalid game number";
         }
+        server.observeGame(gameID);
+        state = State.GAMEPLAY;
         return "You joined a game as an observer";
     }
 
@@ -251,6 +255,7 @@ public class ChessClient {
         server.leaveGame();
         state = State.SIGNED_IN;
         teamColor = ChessGame.TeamColor.WHITE;
+        currGame = null;
         return "You left the game";
     }
 
@@ -269,7 +274,8 @@ public class ChessClient {
         ServerMessage message = new Gson().fromJson(msg, ServerMessage.class);
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
             var gameData = new Gson().fromJson(message.getMessage(), GameData.class);
-            refreshGame(gameData.game());
+            currGame = gameData.game();
+            refreshGame();
         } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
             System.out.printf("%s%n", message.getMessage());
         } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
@@ -277,8 +283,11 @@ public class ChessClient {
         }
     }
 
-    private void refreshGame(ChessGame game) {
-        BoardUI.drawBoard(game.getBoard(), teamColor);
+    private String refreshGame() {
+        if (currGame != null) {
+            BoardUI.drawBoard(currGame.getBoard(), teamColor);
+        }
+        return "";
     }
 
     private void initGamesList() throws ResponseException {

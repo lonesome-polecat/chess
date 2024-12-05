@@ -87,6 +87,17 @@ public class ServerFacade {
         }
     }
 
+    public void observeGame(String gameID) throws ResponseException {
+        try {
+            WSSession = new WSClient(client, String.format("%s", serverWSUrl));
+            connectedGameId = gameID;
+            connect();
+        } catch (Exception e) {
+            System.out.printf("Error connecting to websocket: %s%n", e);
+            throw new ResponseException(500, "ERROR");
+        }
+    }
+
     public void makeMove(String move) {
         // String msg = "This is my first message from my client";
         var command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, Integer.parseInt(connectedGameId), move);

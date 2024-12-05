@@ -145,7 +145,7 @@ public class Server {
                     game = gameDataMap.get(gameID);
                 }
 
-                var playerOrObserver = "an observer";
+                String playerOrObserver = "an observer";
 
                 // Check if user is a player or observer
                 if (Objects.equals(username, game.whiteUsername())) {
@@ -283,7 +283,7 @@ public class Server {
                 gameService.updateGame(gameData);
 
                 // Send LOAD_GAME to all users
-                var gameJson = new Gson().toJson(game);
+                var gameJson = new Gson().toJson(gameData);
                 var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameJson);
                 String loadGameMessage = new Gson().toJson(serverMsg);
                 broadcastMessage(gameID, loadGameMessage);
