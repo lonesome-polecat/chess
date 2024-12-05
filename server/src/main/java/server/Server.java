@@ -171,14 +171,20 @@ public class Server {
                     playerColor = ChessGame.TeamColor.BLACK;
                 } else {
                     // user is not a player
-                    throw new ResponseException(401, "Error: user is not a player in game");
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: user is not a player in game");
+                    var errorMsg = new Gson().toJson(serverErrorMessage);
+                    session.getRemote().sendString(errorMsg);
+                    return;
                 }
 
                 // Deserialize the game and check if it is the player's turn
                 ChessGame game = gameData.game();
                 var currTurn = game.getTeamTurn();
                 if (currTurn != playerColor) {
-                    throw new ResponseException(401, "Error: it is not the user's turn");
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "It is not your turn");
+                    var errorMsg = new Gson().toJson(serverErrorMessage);
+                    session.getRemote().sendString(errorMsg);
+                    return;
                 }
 
                 // double check that they sent an actual move
@@ -208,7 +214,10 @@ public class Server {
                 }
 
                 if (!isValid) {
-                    throw new ResponseException(400, "Error: invalid move");
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: invalid move");
+                    var errorMsg = new Gson().toJson(serverErrorMessage);
+                    session.getRemote().sendString(errorMsg);
+                    return;
                 }
 
                 game.makeMove(officialMove);

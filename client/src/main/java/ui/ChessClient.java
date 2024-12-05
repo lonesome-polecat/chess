@@ -265,11 +265,14 @@ public class ChessClient {
 
     public void onMessage(String msg) {
         System.out.flush();
-        System.out.printf("Incoming msg: %s%n", msg);
         ServerMessage message = new Gson().fromJson(msg, ServerMessage.class);
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
             var game = new Gson().fromJson(message.getMessage(), ChessGame.class);
             refreshGame(game);
+        } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+            System.out.printf("%s%n", message.getMessage());
+        } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+            System.out.printf("%s%n", message.getMessage());
         }
     }
 

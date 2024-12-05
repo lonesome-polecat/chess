@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccess;
+import dataaccess.MySqlDataAccess;
 import model.GameData;
 import model.JoinGameRequest;
 import model.ListGamesResponse;
@@ -57,7 +58,7 @@ public class GameService {
         }
 
         if (Objects.equals(request.playerColor(), "WHITE")) {
-            if (currGame.whiteUsername() != null) {
+            if (currGame.whiteUsername() != null && !currGame.whiteUsername().equals(username)) {
                 throw new ResponseException(403, "Error: already taken");
             } else {
                 var modGame = new GameData(currGame.gameID(), username, currGame.blackUsername(), currGame.gameName(), currGame.game());
@@ -68,7 +69,7 @@ public class GameService {
                 }
             }
         } else if (Objects.equals(request.playerColor(), "BLACK")) {
-            if (currGame.blackUsername() != null) {
+            if (currGame.blackUsername() != null && !currGame.blackUsername().equals(username)) {
                 throw new ResponseException(403, "Error: already taken");
             } else {
                 var modGame = new GameData(currGame.gameID(), currGame.whiteUsername(), username, currGame.gameName(), currGame.game());
