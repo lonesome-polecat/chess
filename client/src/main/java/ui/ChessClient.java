@@ -40,6 +40,7 @@ public class ChessClient {
                 return switch (cmd) {
                     case "makemove" -> makeMove(params);
                     case "drawboard" -> refreshGame();
+                    case "highlightmoves" -> highlightValidMoves(params);
                     case "leave" -> leaveGame();
                     case "resign" -> resignGame();
                     case "signout" -> signOut();
@@ -83,7 +84,7 @@ public class ChessClient {
         } else if (state == State.GAMEPLAY) {
             return """
                     - drawBoard
-                    - highlightMoves
+                    - highlightMoves <piece position>
                     - makeMove
                     - leave
                     - resign
