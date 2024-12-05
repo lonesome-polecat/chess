@@ -378,6 +378,15 @@ public class Server {
                     return;
                 }
 
+                // check if game has already ended
+                if (gameData.game().getGameState() == ChessGame.GameState.GAME_OVER) {
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                    serverErrorMessage.setErrorMessage("Error: the game is already over");
+                    var errorMsg = new Gson().toJson(serverErrorMessage);
+                    session.getRemote().sendString(errorMsg);
+                    return;
+                }
+
                 // End game
                 var game = gameData.game();
                 game.gameOver();
