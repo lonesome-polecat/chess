@@ -1,12 +1,15 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import model.*;
 import model.ResponseException;
 import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 public class ChessClient {
     private final ServerFacade server;
@@ -304,7 +307,19 @@ public class ChessClient {
     }
 
     private String highlightValidMoves(String[] params) {
-
+        if (params.length != 1) {
+            return "Invalid input: must be single chess position in Chess notation (i.e. a2)";
+        } else if (params[0].length() != 2) {
+            return "Invalid input: must be single chess position in Chess notation (i.e. a2)";
+        }
+        var piecePosition = ChessPosition.parsePosition(params[0]);
+        Collection<ChessMove> validMoves;
+        try {
+            validMoves = currGame.validMoves(piecePosition);
+        } catch (Exception e) {
+            return "Invalid position";
+        }
+        // BoardUI.highlightValidMoves(validMoves);
         return "";
     }
 
