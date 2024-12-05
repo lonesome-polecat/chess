@@ -11,7 +11,7 @@ public class BoardUITests {
     public void testPrintBoardWhitePerspective() {
         var board = new ChessBoard();
         board.resetBoard();
-        BoardUI.drawBoard(board, ChessGame.TeamColor.WHITE);
+        BoardUI.drawBoard(board, ChessGame.TeamColor.WHITE, null);
 
         Assertions.assertTrue(true);
     }
@@ -20,7 +20,7 @@ public class BoardUITests {
     public void testPrintBoardBlackPerspective() {
         var board = new ChessBoard();
         board.resetBoard();
-        BoardUI.drawBoard(board, ChessGame.TeamColor.BLACK);
+        BoardUI.drawBoard(board, ChessGame.TeamColor.BLACK, null);
 
         Assertions.assertTrue(true);
     }

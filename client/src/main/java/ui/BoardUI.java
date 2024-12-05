@@ -4,6 +4,7 @@ import chess.*;
 
 import java.io.PrintStream;
 import java.util.Collection;
+import java.util.HashSet;
 
 import static ui.EscapeSequences.*;
 
@@ -30,7 +31,7 @@ public class BoardUI {
     }
 
     public static void drawBoard(ChessBoard board, ChessGame.TeamColor teamColor, Collection<ChessMove> validMoves) {
-        var possibleMoves = formatMoves(validMoves);
+        var highlightPositions = formatMoves(validMoves);
         TileColor tileColor = TileColor.WHITE;
         for (int i = 1; i <= board.boardSize+2; i++) {
             if (i == 1) {
@@ -50,8 +51,9 @@ public class BoardUI {
                 }
                 // add check to see if position in validMoves
                 // If so then pass true to setTileColor
-                setTileColor(tileColor, possibleMoves[i-1][j]);
-                printPiece(i, j, teamColor, board);
+                var position = getAccuratePosition(i, j, teamColor);
+                setTileColor(tileColor, position, highlightPositions);
+                printPiece(position, board, highlightPositions);
             }
             printSideBorder(i, teamColor);
             OUT.println(RESET_BG_COLOR);
@@ -85,16 +87,7 @@ public class BoardUI {
         }
     }
 
-    private static void printPiece(int iIndex, int jIndex, ChessGame.TeamColor teamColor, ChessBoard board) {
-        // i_index comes in as 2-9
-        // j_index comes in as 1-8
-        // Compensate as need be
-        ChessPosition pos;
-        if (teamColor == ChessGame.TeamColor.WHITE) {
-            pos = new ChessPosition(10-iIndex, jIndex);
-        } else {
-            pos = new ChessPosition(iIndex-1, 9-jIndex);
-        }
+    private static void printPiece(ChessPosition pos, ChessBoard board, HashSet<ChessPosition> highlightPos) {
         var piece = board.getPiece(pos);
         String icon = " ";
         if (piece != null) {
@@ -109,6 +102,19 @@ public class BoardUI {
         OUT.printf(" %s ", icon);
     }
 
+    private static ChessPosition getAccuratePosition(int iIndex, int jIndex, ChessGame.TeamColor teamColor) {
+        // i_index comes in as 2-9
+        // j_index comes in as 1-8
+        // Compensate as need be
+        ChessPosition pos;
+        if (teamColor == ChessGame.TeamColor.WHITE) {
+            pos = new ChessPosition(10-iIndex, jIndex);
+        } else {
+            pos = new ChessPosition(iIndex-1, 9-jIndex);
+        }
+        return pos;
+    }
+
     private static TileColor switchTileColor(TileColor tileColor) {
         if (tileColor == TileColor.WHITE) {
             tileColor = TileColor.BLACK;
@@ -118,32 +124,37 @@ public class BoardUI {
         return tileColor;
     }
 
-    private static void setTileColor(TileColor tileColor, boolean highlight) {
+    private static void setTileColor(TileColor tileColor, ChessPosition pos, HashSet<ChessPosition> highlightPos) {
+        // Check if position needs highlighting
+        boolean highlight = highlightPos.contains(pos);
+
         if (tileColor == TileColor.WHITE) {
-            OUT.printf(LIGHT_BG_COLOR);
+            if (highlight) {
+                OUT.printf(LIGHT_HIGHLIGHT_COLOR);
+            } else {
+                OUT.printf(LIGHT_BG_COLOR);
+            }
         } else if (tileColor == TileColor.BLACK) {
-            OUT.printf(DARK_BG_COLOR);
+            if (highlight) {
+                OUT.printf(DARK_HIGHLIGHT_COLOR);
+            } else {
+                OUT.printf(DARK_BG_COLOR);
+            }
         }
     }
 
-    private static boolean[][] formatMoves(Collection<ChessMove> validMoves) {
-        boolean[][] validMovesTable = new boolean[8][8];
+    private static HashSet<ChessPosition> formatMoves(Collection<ChessMove> validMoves) {
+        var positionSet = new HashSet<ChessPosition>();
         if (validMoves == null) {
-            return validMovesTable;
+            return positionSet;
         }
 
         for (var move : validMoves) {
             // highlight starting position - unnecessary to do more than once but Collection is weird
-            var row = move.getStartPosition().getRow();
-            var col = move.getStartPosition().getColumn();
-            validMovesTable[row][col] = true;
-
-            // highlight ending position
-            row = move.getEndPosition().getRow();
-            col = move.getEndPosition().getColumn();
-            validMovesTable[row][col] = true;
+            positionSet.add(move.getStartPosition());
+            positionSet.add(move.getEndPosition());
         }
-        return validMovesTable;
+        return positionSet;
     }
 
     private static String getIconFromPieceType(ChessPiece.PieceType type) {

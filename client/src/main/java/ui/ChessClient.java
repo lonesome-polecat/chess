@@ -302,7 +302,7 @@ public class ChessClient {
 
     private String refreshGame() {
         if (currGame != null) {
-            BoardUI.drawBoard(currGame.getBoard(), teamColor);
+            BoardUI.drawBoard(currGame.getBoard(), teamColor, null);
         }
         return "";
     }
@@ -317,10 +317,10 @@ public class ChessClient {
         Collection<ChessMove> validMoves;
         try {
             validMoves = currGame.validMoves(piecePosition);
+            BoardUI.drawBoard(currGame.getBoard(), teamColor, validMoves);
         } catch (Exception e) {
             return "Invalid position";
         }
-        // BoardUI.highlightValidMoves(validMoves);
         return "";
     }
 
