@@ -200,6 +200,7 @@ public class ChessClient {
 
         var joinGameRequest = new JoinGameRequest(gameID, playerColorString);
         try {
+            teamColor = playerColor;
             server.joinGame(joinGameRequest);
             // Enter gameplay state
             var result = checkValidGameID(gameID, playerColor);
@@ -207,9 +208,9 @@ public class ChessClient {
                 return "Error: unable to play game";
             }
             state = State.GAMEPLAY;
-            teamColor = playerColor;
             return String.format("You joined a game as %s team", playerColorString);
         } catch (ResponseException e) {
+            teamColor = ChessGame.TeamColor.WHITE;
             return "Error: unable to play game";
         }
     }
@@ -267,8 +268,8 @@ public class ChessClient {
         System.out.flush();
         ServerMessage message = new Gson().fromJson(msg, ServerMessage.class);
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
-            var game = new Gson().fromJson(message.getMessage(), ChessGame.class);
-            refreshGame(game);
+            var gameData = new Gson().fromJson(message.getMessage(), GameData.class);
+            refreshGame(gameData.game());
         } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
             System.out.printf("%s%n", message.getMessage());
         } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {

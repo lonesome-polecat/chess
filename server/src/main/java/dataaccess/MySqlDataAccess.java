@@ -177,11 +177,12 @@ public class MySqlDataAccess implements DataAccess {
         public void updateGame(GameData gameData) throws DataAccessException {
             // Modify existing game with new player information in game table in database
             try (var conn = DatabaseManager.getConnection()) {
-                var statement = "UPDATE game SET whiteUsername=?, blackUsername=? WHERE gameID=?";
+                var statement = "UPDATE game SET whiteUsername=?, blackUsername=?, gameString=? WHERE gameID=?";
                 try (var ps = conn.prepareStatement(statement)) {
                     ps.setString(1, gameData.whiteUsername());
                     ps.setString(2, gameData.blackUsername());
-                    ps.setInt(3, gameData.gameID());
+                    ps.setString(3, new Gson().toJson(gameData.game()));
+                    ps.setInt(4, gameData.gameID());
                     var rowsAffected = ps.executeUpdate();
                     if (rowsAffected < 1) {
                         throw new DataAccessException("Error: cannot update name");

@@ -197,6 +197,19 @@ public class Server {
                 ChessPosition[] positions = parseMove(userCommand.getMove());
 
                 // Check that player's move is valid
+                var board = game.getBoard();
+                var piece = board.getPiece(positions[0]);
+                if (piece == null) {
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: invalid move");
+                    var errorMsg = new Gson().toJson(serverErrorMessage);
+                    session.getRemote().sendString(errorMsg);
+                    return;
+                } else if (piece.getTeamColor() != playerColor) {
+                    var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Error: invalid move");
+                    var errorMsg = new Gson().toJson(serverErrorMessage);
+                    session.getRemote().sendString(errorMsg);
+                    return;
+                }
                 var validMoves = game.validMoves(positions[0]);
 
                 boolean isValid = false;
