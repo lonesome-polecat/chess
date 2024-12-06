@@ -287,8 +287,13 @@ public class ChessClient {
             throw new ResponseException(400, "You must first join a game");
         }
         // Add a "are you sure?" prompt
-        server.resignGame();
-        return "You resigned";
+        boolean confirmation = confirmResign();
+        if (confirmation) {
+            server.resignGame();
+            return "You resigned";
+        } else {
+            return "";
+        }
     }
 
     public void onMessage(String msg) {
@@ -382,6 +387,21 @@ public class ChessClient {
             };
         }
         return new ChessMove(startPosition, endPosition, promotionPiece);
+    }
+
+    private boolean confirmResign() {
+        Scanner scanner = new Scanner(System.in);
+
+        List<String> validOptions = Arrays.asList("yes", "y", "no", "n");
+        String choice = getValidatedString(scanner, "Are you sure you want to resign? (yes/no): ", validOptions);
+        var answer = switch(choice) {
+            case "yes" -> true;
+            case "y" -> true;
+            case "no" -> false;
+            case "n" -> false;
+            default -> false;
+        };
+        return answer;
     }
 
     private static String getValidatedString(Scanner scanner, String prompt, List<String> validOptions) {

@@ -177,20 +177,20 @@ public class Server {
         // Helper to broadcast messages to a group
         private void broadcastMessage(Integer sessionId, String message, Session session) {
             List<Session> sessions = SESSION_MAP.get(sessionId);
-
-            if (sessions != null) {
-                sessions.forEach(s -> {
-                    try {
-                        if (s.isOpen()) {
-                            if (!s.equals(session)) {
-                                s.getRemote().sendString(message); // Send the message
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
+            if (sessions == null) {
+                return;
             }
+            sessions.forEach(s -> {
+                try {
+                    if (s.isOpen()) {
+                        if (!s.equals(session)) {
+                            s.getRemote().sendString(message); // Send the message
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
         }
 
         private void userConnect(Session session, String username, int gameID) throws Exception {
@@ -263,18 +263,12 @@ public class Server {
             }
 
             // Check if user is a player or observer
-            if (Objects.equals(username, gameData.whiteUsername())) {
-                playerColor = ChessGame.TeamColor.WHITE;
-            } else if (Objects.equals(username, gameData.blackUsername())) {
-                playerColor = ChessGame.TeamColor.BLACK;
-            } else {
-                // user is not a player
-                var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
-                serverErrorMessage.setErrorMessage("Error: user is not a player in game");
-                var errorMsg = new Gson().toJson(serverErrorMessage);
-                session.getRemote().sendString(errorMsg);
+            var players = getPlayerAndOpponentColors(session, username, gameData);
+            if (players == null) {
                 return;
             }
+            playerColor = players[0];
+            var opponentColor = players[1];
 
             // Deserialize the game and check if it is the player's turn
             ChessGame game = gameData.game();
@@ -304,17 +298,8 @@ public class Server {
             // Check that player's move is valid
             var board = game.getBoard();
             var piece = board.getPiece(move.getStartPosition());
-            if (piece == null) {
-                var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
-                serverErrorMessage.setErrorMessage("Error: invalid move");
-                var errorMsg = new Gson().toJson(serverErrorMessage);
-                session.getRemote().sendString(errorMsg);
-                return;
-            } else if (piece.getTeamColor() != playerColor) {
-                var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
-                serverErrorMessage.setErrorMessage("Error: invalid move");
-                var errorMsg = new Gson().toJson(serverErrorMessage);
-                session.getRemote().sendString(errorMsg);
+            if (piece == null || piece.getTeamColor() != playerColor) {
+                sendInvalidMoveError(session);
                 return;
             }
             var validMoves = game.validMoves(move.getStartPosition());
@@ -343,33 +328,9 @@ public class Server {
             game.makeMove(move);
 
             // Check to see if opponent in check or checkmate or stalemate
-            ChessGame.TeamColor opponentColor = switch (playerColor) {
-                case BLACK -> ChessGame.TeamColor.WHITE;
-                case WHITE -> ChessGame.TeamColor.BLACK;
-            };
             game.setTeamTurn(opponentColor);
 
-            ServerMessage checkOrGameOverServerMsg = null;
-            if (game.isInCheck(opponentColor)) {
-                if (game.isInCheckmate(opponentColor)) {
-                    // user won! prep notification
-                    game.gameOver();
-                    game.setWinner(playerColor);
-
-                    var msg = String.format("Checkmate! %s (%s) wins!", username, playerColor);
-                    checkOrGameOverServerMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
-                } else {
-                    // opponent in check, prep notification
-                    var msg = String.format("%s is in check", opponentColor);
-                    checkOrGameOverServerMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
-                }
-            }
-            if (game.isInStalemate(opponentColor)) {
-                // It's a tie! prep notification
-                game.gameOver();
-                var msg = String.format("%s is in stalemate! It's a tie!", opponentColor);
-                checkOrGameOverServerMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
-            }
+            ServerMessage checkOrGameOverServerMsg = checkIfCheckOrGameOver(username, playerColor, opponentColor, game);
 
             // Update game in map and DB
             gameData = new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
@@ -455,20 +416,12 @@ public class Server {
             }
 
             // Check if user is a player or observer
-            if (Objects.equals(username, gameData.whiteUsername())) {
-                playerColor = ChessGame.TeamColor.WHITE;
-                opponentColor = ChessGame.TeamColor.BLACK;
-            } else if (Objects.equals(username, gameData.blackUsername())) {
-                playerColor = ChessGame.TeamColor.BLACK;
-                opponentColor = ChessGame.TeamColor.WHITE;
-            } else {
-                // user is not a player
-                var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
-                serverErrorMessage.setErrorMessage("Error: user is not a player in game");
-                var errorMsg = new Gson().toJson(serverErrorMessage);
-                session.getRemote().sendString(errorMsg);
+            var players = getPlayerAndOpponentColors(session, username, gameData);
+            if (players == null) {
                 return;
             }
+            playerColor = players[0];
+            opponentColor = players[1];
 
             // check if game has already ended
             if (gameData.game().getGameState() == ChessGame.GameState.GAME_OVER) {
@@ -502,6 +455,60 @@ public class Server {
             var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
             String leaveGameMessage = new Gson().toJson(serverMsg);
             broadcastMessage(gameID, leaveGameMessage, null);
+        }
+
+        private void sendInvalidMoveError(Session session) throws Exception {
+            var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+            serverErrorMessage.setErrorMessage("Error: invalid move");
+            var errorMsg = new Gson().toJson(serverErrorMessage);
+            session.getRemote().sendString(errorMsg);
+        }
+
+        private ChessGame.TeamColor[] getPlayerAndOpponentColors(Session session, String username, GameData gameData) throws Exception {
+            ChessGame.TeamColor playerColor;
+            ChessGame.TeamColor opponentColor;
+
+            // Check if user is a player or observer
+            if (Objects.equals(username, gameData.whiteUsername())) {
+                playerColor = ChessGame.TeamColor.WHITE;
+                opponentColor = ChessGame.TeamColor.BLACK;
+            } else if (Objects.equals(username, gameData.blackUsername())) {
+                playerColor = ChessGame.TeamColor.BLACK;
+                opponentColor = ChessGame.TeamColor.WHITE;
+            } else {
+                // user is not a player
+                var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                serverErrorMessage.setErrorMessage("Error: user is not a player in game");
+                var errorMsg = new Gson().toJson(serverErrorMessage);
+                session.getRemote().sendString(errorMsg);
+                return null;
+            }
+            return new ChessGame.TeamColor[]{playerColor, opponentColor};
+        }
+
+        private ServerMessage checkIfCheckOrGameOver(String username, ChessGame.TeamColor player, ChessGame.TeamColor opponent, ChessGame game) {
+            ServerMessage checkOrGameOverServerMsg = null;
+            if (game.isInCheck(opponent)) {
+                if (game.isInCheckmate(opponent)) {
+                    // user won! prep notification
+                    game.gameOver();
+                    game.setWinner(player);
+
+                    var msg = String.format("Checkmate! %s (%s) wins!", username, player);
+                    checkOrGameOverServerMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+                } else {
+                    // opponent in check, prep notification
+                    var msg = String.format("%s is in check", opponent);
+                    checkOrGameOverServerMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+                }
+            }
+            if (game.isInStalemate(opponent)) {
+                // It's a tie! prep notification
+                game.gameOver();
+                var msg = String.format("%s is in stalemate! It's a tie!", opponent);
+                checkOrGameOverServerMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
+            }
+            return checkOrGameOverServerMsg;
         }
 
         public void clear() {
