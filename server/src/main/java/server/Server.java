@@ -198,6 +198,11 @@ public class Server {
 
                 // Check if game is active
                 GameData gameData = gameDataMap.get(gameID);
+                if (gameData.blackUsername() == null || gameData.whiteUsername() == null) {
+                    // Just in case, refresh game
+                    gameData = gameDAO.getGame(gameID);
+                    gameDataMap.put(gameID, gameData);
+                }
 
                 // Check if user is a player or observer
                 if (Objects.equals(username, gameData.whiteUsername())) {
@@ -339,6 +344,31 @@ public class Server {
                 }
             }
             if (userCommand.getCommandType() == UserGameCommand.CommandType.LEAVE) {
+                ChessGame.TeamColor playerColor = null;
+
+                // Check if game is active
+                GameData gameData = gameDataMap.get(gameID);
+
+                // Check if user is a player or observer
+                if (Objects.equals(username, gameData.whiteUsername())) {
+                    playerColor = ChessGame.TeamColor.WHITE;
+                } else if (Objects.equals(username, gameData.blackUsername())) {
+                    playerColor = ChessGame.TeamColor.BLACK;
+                }
+
+                if (playerColor != null) {
+                    // remove them as player from the game and update
+                    if (playerColor == ChessGame.TeamColor.WHITE) {
+                        gameData = new GameData(gameID, null, gameData.blackUsername(), gameData.gameName(), gameData.game());
+                    } else {
+                        gameData = new GameData(gameID, gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
+                    }
+
+                    // Update game in map and DB
+                    gameDataMap.put(gameID, gameData);
+                    gameService.updateGame(gameData);
+                }
+
                 var sessions = sessionMap.get(gameID);
                 for (int i = 0; i < sessions.size(); i++) {
                     if (sessions.get(i).equals(session)) {
@@ -361,6 +391,11 @@ public class Server {
 
                 // Check if game is active
                 GameData gameData = gameDataMap.get(gameID);
+                if (gameData.blackUsername() == null || gameData.whiteUsername() == null) {
+                    // Just in case, refresh game
+                    gameData = gameDAO.getGame(gameID);
+                    gameDataMap.put(gameID, gameData);
+                }
 
                 // Check if user is a player or observer
                 if (Objects.equals(username, gameData.whiteUsername())) {
