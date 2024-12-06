@@ -265,6 +265,9 @@ public class ChessClient {
         if (params.length != 1) {
             throw new ResponseException(400, "You must enter a move like this: a2a3");
         }
+        if (params[0].length() != 4) {
+            throw new ResponseException(400, "You must enter a move like this: a2a3");
+        }
         if (currGame.getTeamTurn() != teamColor) {
             return "It is not your turn";
         }
@@ -368,9 +371,15 @@ public class ChessClient {
         return false;
     }
 
-    private ChessMove parseMove(String moveString) {
-        ChessPosition startPosition = ChessPosition.parseStringToPosition(moveString.substring(0,2));
-        ChessPosition endPosition = ChessPosition.parseStringToPosition(moveString.substring(2,4));
+    private ChessMove parseMove(String moveString) throws ResponseException {
+        ChessPosition startPosition;
+        ChessPosition endPosition;
+        try {
+            startPosition = ChessPosition.parseStringToPosition(moveString.substring(0,2));
+            endPosition = ChessPosition.parseStringToPosition(moveString.substring(2,4));
+        } catch (Exception e) {
+            throw new ResponseException(400, "Error: invalid move");
+        }
         var board = currGame.getBoard();
         var piece = board.getPiece(startPosition);
         var row = endPosition.getRow();
