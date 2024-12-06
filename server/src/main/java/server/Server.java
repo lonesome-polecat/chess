@@ -216,6 +216,10 @@ public class Server {
             } else {
                 game = GAME_DATA_MAP.get(gameID);
             }
+            // Just in case, refresh game
+            game = gameDAO.getGame(gameID);
+            GAME_DATA_MAP.put(gameID, game);
+
             String playerOrObserver = "an observer";
             // Check if user is a player or observer
             if (Objects.equals(username, game.whiteUsername())) {
