@@ -271,7 +271,7 @@ public class ChessClient {
 
         ChessMove move = parseMove(params[0]);
         server.makeMove(move);
-        return "You made a move";
+        return "";
     }
 
     public String leaveGame() throws ResponseException {
@@ -307,7 +307,7 @@ public class ChessClient {
             currGame = game;
             refreshGame();
         } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
-            System.out.printf("%s%n", message.getMessage());
+            System.out.printf("%s%n", message.getErrorMessage());
         } else if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
             System.out.printf("%s%n", message.getMessage());
         }
