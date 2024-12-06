@@ -6,8 +6,6 @@ import model.*;
 import model.ResponseException;
 import websocket.commands.UserGameCommand;
 
-import javax.websocket.ContainerProvider;
-import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,7 +19,7 @@ public class ServerFacade {
     private final String serverHTTPUrl;
     private final String serverWSUrl;
     private String authToken = "";
-    private WSClient WSSession;
+    private WSClient wsSession;
     private final ChessClient client;
     private String connectedGameId;
 
@@ -58,7 +56,7 @@ public class ServerFacade {
         var path = "/game";
         makeRequest("PUT", path, joinGameRequest, Object.class);
         try {
-            WSSession = new WSClient(client, String.format("%s", serverWSUrl));
+            wsSession = new WSClient(client, String.format("%s", serverWSUrl));
             connectedGameId = joinGameRequest.gameID();
             connect();
         } catch (Exception e) {
@@ -82,7 +80,7 @@ public class ServerFacade {
         // String msg = "This is my first message from my client";
         var command = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, Integer.parseInt(connectedGameId), null);
         try {
-            WSSession.sendUserGameCommand(command);
+            wsSession.sendUserGameCommand(command);
         } catch (Exception e) {
             System.out.printf("Unable to send WS command: %s%n", e);
         }
@@ -90,7 +88,7 @@ public class ServerFacade {
 
     public void observeGame(String gameID) throws ResponseException {
         try {
-            WSSession = new WSClient(client, String.format("%s", serverWSUrl));
+            wsSession = new WSClient(client, String.format("%s", serverWSUrl));
             connectedGameId = gameID;
             connect();
         } catch (Exception e) {
@@ -102,7 +100,7 @@ public class ServerFacade {
     public void makeMove(ChessMove move) {
         var command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, Integer.parseInt(connectedGameId), move);
         try {
-            WSSession.sendUserGameCommand(command);
+            wsSession.sendUserGameCommand(command);
         } catch (Exception e) {
             System.out.printf("Unable to send WS command: %s%n", e);
         }
@@ -111,7 +109,7 @@ public class ServerFacade {
     public void leaveGame() {
         var command = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, Integer.parseInt(connectedGameId), null);
         try {
-            WSSession.sendUserGameCommand(command);
+            wsSession.sendUserGameCommand(command);
         } catch (Exception e) {
             System.out.printf("Unable to send WS command: %s%n", e);
         }
@@ -120,7 +118,7 @@ public class ServerFacade {
     public void resignGame() {
         var command = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, Integer.parseInt(connectedGameId), null);
         try {
-            WSSession.sendUserGameCommand(command);
+            wsSession.sendUserGameCommand(command);
         } catch (Exception e) {
             System.out.printf("Unable to send WS command: %s%n", e);
         }
