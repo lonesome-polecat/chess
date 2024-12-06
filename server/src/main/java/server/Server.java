@@ -106,6 +106,7 @@ public class Server {
 
     private Object clearDB(Request request, Response response) {
         authService.clearDB();
+        wsHandler.clear();
         return "{}";
     }
 
@@ -114,7 +115,6 @@ public class Server {
         // ConcurrentHashMap to store WebSocket connections
         private static final ConcurrentHashMap<Integer, List<Session>> sessionMap = new ConcurrentHashMap<>();
         private static final ConcurrentHashMap<Integer, GameData> gameDataMap = new ConcurrentHashMap<>();
-        private static final LinkedList<String> users = new LinkedList<String>();
 
         @OnWebSocketMessage
         public void onMessage(Session session, String message) throws Exception {
@@ -132,7 +132,6 @@ public class Server {
                 return;
             }
 
-            users.add(username);
             var gameID = userCommand.getGameID();
 
             if (userCommand.getCommandType() == UserGameCommand.CommandType.CONNECT) {
@@ -503,6 +502,11 @@ public class Server {
                     }
                 });
             }
+        }
+
+        public void clear() {
+            gameDataMap.clear();
+            sessionMap.clear();
         }
     }
 
