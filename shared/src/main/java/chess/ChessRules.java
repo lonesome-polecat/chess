@@ -122,7 +122,6 @@ public class ChessRules {
                     } else {
                         attackVectors.add(possiblePos);
                     }
-                    break;
                 }
             }
         }
