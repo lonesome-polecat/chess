@@ -265,6 +265,9 @@ public class ChessClient {
         if (params.length != 1) {
             throw new ResponseException(400, "You must enter a move like this: a2a3");
         }
+        if (currGame.getTeamTurn() != teamColor) {
+            return "It is not your turn";
+        }
 
         ChessMove move = parseMove(params[0]);
         server.makeMove(move);

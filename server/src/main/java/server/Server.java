@@ -288,7 +288,6 @@ public class Server {
             }
             var validMoves = game.validMoves(move.getStartPosition());
             boolean isValid = false;
-            ChessMove officialMove = null;
             for (var validMove : validMoves) {
                 var startPos = validMove.getStartPosition();
                 var endPos = validMove.getEndPosition();
