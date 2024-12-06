@@ -1,7 +1,6 @@
 package ui;
 
 import com.google.gson.Gson;
-import server.Server;
 import websocket.commands.UserGameCommand;
 
 import javax.websocket.*;
