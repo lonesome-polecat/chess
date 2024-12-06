@@ -399,7 +399,6 @@ public class Server {
             }
             playerColor = players[0];
             opponentColor = players[1];
-
             // check if game has already ended
             if (gameData.game().getGameState() == ChessGame.GameState.GAME_OVER) {
                 var serverErrorMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
@@ -408,7 +407,6 @@ public class Server {
                 session.getRemote().sendString(errorMsg);
                 return;
             }
-
             // End game
             var game = gameData.game();
             game.gameOver();
@@ -426,7 +424,6 @@ public class Server {
             } else {
                 opponentUsername = gameData.blackUsername();
             }
-
             // Send NOTIFICATION to all users
             var msg = String.format("%s (%s) resigned. %s (%s) wins!", username, playerColor, opponentUsername, opponentColor);
             var serverMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
@@ -470,7 +467,6 @@ public class Server {
                     // user won! prep notification
                     game.gameOver();
                     game.setWinner(player);
-
                     var msg = String.format("Checkmate! %s (%s) wins!", username, player);
                     checkOrGameOverServerMsg = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, msg);
                 } else {
